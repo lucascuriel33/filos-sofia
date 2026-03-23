@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>φίλος σοφία</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── CSS VARIABLES ─────────────────────────────────── */
+    :root {
+      --transition: 0.35s ease;
+    }
+    [data-theme="dark"] {
+      --bg:          #0d0c0a;
+      --bg-2:        #141210;
+      --bg-card:     #1a1715;
+      --bg-input:    #201d1a;
+      --border:      #2e2925;
+      --border-alt:  #3d3730;
+      --text:        #e8e0d2;
+      --text-2:      #a09080;
+      --text-3:      #6a5e52;
+      --gold:        #c9a84c;
+      --gold-dim:    #7a6230;
+      --gold-glow:   rgba(201,168,76,0.12);
+      --red:         #b85c45;
+      --shadow:      0 4px 32px rgba(0,0,0,0.6);
+      --shadow-sm:   0 2px 12px rgba(0,0,0,0.4);
+      --noise:       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+    }
+    [data-theme="light"] {
+      --bg:          #f5f0e8;
+      --bg-2:        #ede8de;
+      --bg-card:     #faf7f2;
+      --bg-input:    #f0ebe1;
+      --border:      #ddd5c4;
+      --border-alt:  #c8bfae;
+      --text:        #1a1612;
+      --text-2:      #5c4f3e;
+      --text-3:      #9a8878;
+      --gold:        #8b6914;
+      --gold-dim:    #c9a84c;
+      --gold-glow:   rgba(139,105,20,0.10);
+      --red:         #8b2a18;
+      --shadow:      0 4px 32px rgba(0,0,0,0.12);
+      --shadow-sm:   0 2px 12px rgba(0,0,0,0.08);
+      --noise:       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    }
+
+    /* ─── RESET & BASE ──────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background-color: var(--bg);
+      background-image: var(--noise);
+      color: var(--text);
+      font-family: 'Crimson Text', Georgia, serif;
+      font-size: 18px;
+      line-height: 1.7;
+      transition: background-color var(--transition), color var(--transition);
+      min-height: 100vh;
+    }
+    a { color: var(--gold); text-decoration: none; transition: opacity 0.2s; }
+    a:hover { opacity: 0.75; }
+    img { max-width: 100%; display: block; }
+    ::selection { background: var(--gold); color: var(--bg); }
+
+    /* ─── GREEK KEY BORDER ──────────────────────────────── */
+    .greek-border {
+      height: 6px;
+      background-image: repeating-linear-gradient(
+        90deg,
+        var(--gold) 0px, var(--gold) 6px,
+        transparent 6px, transparent 12px
+      ),
+      repeating-linear-gradient(
+        90deg,
+        var(--gold) 0px, var(--gold) 6px,
+        transparent 6px, transparent 12px
+      );
+      background-size: 24px 3px, 24px 3px;
+      background-position: 0 0, 12px 3px;
+      opacity: 0.6;
+    }
+
+    /* ─── HEADER / NAV ──────────────────────────────────── */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: var(--bg-2);
+      border-bottom: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      backdrop-filter: blur(8px);
+    }
+    .header-inner {
+      max-width: 1100px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 2rem; height: 64px;
+    }
+    .logo {
+      display: flex; align-items: baseline; gap: 0.4rem;
+      text-decoration: none;
+    }
+    .logo-greek {
+      font-family: 'IM Fell English', 'Cormorant Garamond', serif;
+      font-size: 1.65rem;
+      color: var(--gold);
+      letter-spacing: 0.02em;
+      line-height: 1;
+    }
+    .logo-sub {
+      font-family: 'Crimson Text', serif;
+      font-size: 0.8rem;
+      color: var(--text-3);
+      font-style: italic;
+      letter-spacing: 0.08em;
+    }
+    nav {
+      display: flex; align-items: center; gap: 0.3rem;
+    }
+    nav a, nav button {
+      background: none; border: none; cursor: pointer;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.92rem;
+      letter-spacing: 0.06em;
+      color: var(--text-2);
+      padding: 0.35rem 0.75rem;
+      border-radius: 4px;
+      transition: color 0.2s, background 0.2s;
+      text-decoration: none;
+    }
+    nav a:hover, nav button:hover { color: var(--text); background: var(--gold-glow); }
+    nav a.active { color: var(--gold); }
+    .theme-btn {
+      width: 36px; height: 36px; padding: 0;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%;
+      font-size: 1.1rem;
+    }
+    .admin-btn {
+      border: 1px solid var(--gold-dim) !important;
+      color: var(--gold) !important;
+      font-size: 0.8rem !important;
+    }
+
+    /* ─── HERO ──────────────────────────────────────────── */
+    .hero {
+      text-align: center;
+      padding: 4.5rem 2rem 3.5rem;
+      border-bottom: 1px solid var(--border);
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 70% 60% at 50% 0%, var(--gold-glow), transparent);
+      pointer-events: none;
+    }
+    .hero-ornament {
+      font-size: 2.5rem; color: var(--gold); opacity: 0.35; margin-bottom: 1rem;
+      letter-spacing: 0.5em;
+    }
+    .hero-title {
+      font-family: 'IM Fell English', 'Cormorant Garamond', serif;
+      font-size: clamp(3rem, 8vw, 5.5rem);
+      color: var(--text);
+      font-weight: 400;
+      letter-spacing: -0.01em;
+      line-height: 1.05;
+      margin-bottom: 0.75rem;
+    }
+    .hero-title span { color: var(--gold); }
+    .hero-tagline {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.05rem;
+      color: var(--text-2);
+      font-style: italic;
+      letter-spacing: 0.1em;
+      max-width: 480px; margin: 0 auto 1.5rem;
+    }
+    .hero-divider {
+      display: flex; align-items: center; justify-content: center;
+      gap: 1rem; color: var(--gold); font-size: 1.3rem; opacity: 0.5;
+    }
+    .hero-divider::before, .hero-divider::after {
+      content: '';
+      width: 80px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold));
+    }
+    .hero-divider::after { background: linear-gradient(270deg, transparent, var(--gold)); }
+
+    /* ─── LAYOUT ────────────────────────────────────────── */
+    .main-wrap {
+      max-width: 1100px; margin: 0 auto; padding: 0 2rem;
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 3rem;
+      padding: 3rem 0;
+    }
+    @media (max-width: 820px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+
+    /* ─── SECTION TITLES ────────────────────────────────── */
+    .section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.5rem;
+      display: flex; align-items: center; gap: 0.75rem;
+    }
+    .section-title::after {
+      content: ''; flex: 1; height: 1px;
+      background: linear-gradient(90deg, var(--gold-dim), transparent);
+    }
+
+    /* ─── POST CARD ─────────────────────────────────────── */
+    .posts { display: flex; flex-direction: column; gap: 2rem; }
+    .post-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 2rem 2.5rem;
+      box-shadow: var(--shadow-sm);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+    .post-card:hover {
+      border-color: var(--gold-dim);
+      box-shadow: var(--shadow), 0 0 0 1px var(--gold-dim);
+    }
+    .post-meta {
+      font-size: 0.78rem;
+      color: var(--text-3);
+      letter-spacing: 0.12em;
+      margin-bottom: 0.75rem;
+      font-family: 'Cormorant Garamond', serif;
+    }
+    .post-tag {
+      display: inline-block;
+      border: 1px solid var(--gold-dim);
+      color: var(--gold);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      padding: 0.1rem 0.5rem;
+      border-radius: 2px;
+      margin-right: 0.5rem;
+      text-transform: uppercase;
+    }
+    .post-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.7rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.2;
+      margin-bottom: 0.75rem;
+      transition: color 0.2s;
+    }
+    .post-card:hover .post-title { color: var(--gold); }
+    .post-excerpt {
+      color: var(--text-2);
+      font-size: 1rem;
+      line-height: 1.65;
+      margin-bottom: 1.25rem;
+    }
+    .post-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      border-top: 1px solid var(--border); padding-top: 0.85rem;
+    }
+    .read-more {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.88rem;
+      letter-spacing: 0.1em;
+      color: var(--gold);
+      display: flex; align-items: center; gap: 0.4rem;
+      background: none; border: none; cursor: pointer;
+    }
+    .post-stats { font-size: 0.78rem; color: var(--text-3); }
+
+    /* ─── SIDEBAR ───────────────────────────────────────── */
+    .sidebar { display: flex; flex-direction: column; gap: 2rem; }
+    .widget {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 1.5rem;
+    }
+
+    /* ─── PDF LIBRARY ───────────────────────────────────── */
+    #biblioteca { padding-top: 1rem; }
+    .pdf-grid { display: flex; flex-direction: column; gap: 0.75rem; }
+    .pdf-item {
+      display: flex; align-items: center; gap: 0.85rem;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 0.85rem 1rem;
+      transition: border-color 0.2s;
+    }
+    .pdf-item:hover { border-color: var(--gold-dim); }
+    .pdf-icon {
+      width: 36px; height: 44px; flex-shrink: 0;
+      background: var(--red);
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 2px;
+      font-size: 0.65rem; font-weight: 700;
+      color: #fff; letter-spacing: 0.05em;
+    }
+    .pdf-info { flex: 1; min-width: 0; }
+    .pdf-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1rem; font-weight: 600;
+      color: var(--text);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .pdf-desc { font-size: 0.8rem; color: var(--text-3); }
+    .pdf-dl {
+      background: none; border: 1px solid var(--border);
+      color: var(--text-2); font-size: 0.75rem; padding: 0.25rem 0.6rem;
+      border-radius: 2px; cursor: pointer; transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .pdf-dl:hover { border-color: var(--gold); color: var(--gold); }
+    .pdf-empty {
+      text-align: center; padding: 2.5rem 1rem;
+      color: var(--text-3); font-style: italic; font-size: 1rem;
+    }
+
+    /* ─── COMMENTS ──────────────────────────────────────── */
+    #comentarios { padding-top: 1rem; }
+    .comments-list { display: flex; flex-direction: column; gap: 1.25rem; margin-bottom: 2.5rem; }
+    .comment-item {
+      display: flex; gap: 1rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .comment-item:last-child { border-bottom: none; }
+    .avatar {
+      width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
+      border: 2px solid var(--border);
+      object-fit: cover;
+      background: var(--bg-input);
+    }
+    .avatar-placeholder {
+      width: 44px; height: 44px; border-radius: 50%; flex-shrink: 0;
+      background: var(--bg-input);
+      border: 2px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem; color: var(--gold);
+      font-weight: 600;
+    }
+    .comment-body { flex: 1; }
+    .comment-header {
+      display: flex; align-items: baseline; gap: 0.6rem;
+      margin-bottom: 0.3rem;
+    }
+    .comment-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600; font-size: 1rem; color: var(--text);
+    }
+    .comment-date { font-size: 0.75rem; color: var(--text-3); }
+    .comment-text { color: var(--text-2); font-size: 0.95rem; line-height: 1.6; }
+
+    /* ─── COMMENT FORM ──────────────────────────────────── */
+    .comment-form { display: flex; flex-direction: column; gap: 1rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 500px) { .form-row { grid-template-columns: 1fr; } }
+    .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+    label {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.8rem; letter-spacing: 0.1em;
+      color: var(--text-3); text-transform: uppercase;
+    }
+    input[type="text"], input[type="email"], textarea {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      color: var(--text);
+      font-family: 'Crimson Text', serif;
+      font-size: 1rem; padding: 0.65rem 0.85rem;
+      transition: border-color 0.2s;
+      outline: none; resize: vertical;
+    }
+    input[type="text"]:focus, input[type="email"]:focus, textarea:focus {
+      border-color: var(--gold-dim);
+    }
+    textarea { min-height: 100px; }
+
+    /* Avatar upload */
+    .avatar-upload-area {
+      border: 1px dashed var(--border);
+      border-radius: 2px;
+      padding: 0.75rem;
+      display: flex; align-items: center; gap: 0.85rem;
+      cursor: pointer; transition: border-color 0.2s;
+    }
+    .avatar-upload-area:hover { border-color: var(--gold-dim); }
+    .avatar-preview {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: var(--bg-input); border: 2px solid var(--border);
+      object-fit: cover; display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; color: var(--text-3); overflow: hidden;
+    }
+    .avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
+    .avatar-upload-text { font-size: 0.85rem; color: var(--text-2); }
+    .avatar-upload-text small { display: block; font-size: 0.72rem; color: var(--text-3); }
+    input[type="file"] { display: none; }
+
+    /* Buttons */
+    .btn {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.95rem; letter-spacing: 0.12em;
+      padding: 0.7rem 1.75rem;
+      border-radius: 2px; border: none; cursor: pointer;
+      transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.5rem;
+    }
+    .btn-primary {
+      background: var(--gold);
+      color: var(--bg);
+      font-weight: 600;
+    }
+    .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn-secondary {
+      background: none; border: 1px solid var(--border);
+      color: var(--text-2);
+    }
+    .btn-secondary:hover { border-color: var(--gold-dim); color: var(--gold); }
+
+    /* ─── ADMIN PANEL ───────────────────────────────────── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.72);
+      backdrop-filter: blur(4px);
+      align-items: center; justify-content: center; padding: 1rem;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--bg-card); border: 1px solid var(--border); border-radius: 4px; padding: 2rem; width: 100%; max-width: 520px; box-shadow: var(--shadow); animation: fadeUp 0.25s ease; }
+    .modal-post { max-width: 720px; max-height: 82vh; overflow-y: auto; }
+    @keyframes fadeUp {
+      from { opacity:0; transform: translateY(16px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
+    .modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .modal-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem; color: var(--gold);
+    }
+    .close-btn {
+      background: none; border: none; cursor: pointer;
+      color: var(--text-3); font-size: 1.4rem; line-height: 1;
+      transition: color 0.2s;
+    }
+    .close-btn:hover { color: var(--text); }
+
+    /* PDF Upload zone */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: 2px; padding: 2rem;
+      text-align: center; cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      margin-bottom: 1rem;
+    }
+    .upload-zone:hover, .upload-zone.drag { border-color: var(--gold); background: var(--gold-glow); }
+    .upload-zone-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+    .upload-zone p { color: var(--text-2); font-size: 0.9rem; }
+    .upload-zone strong { color: var(--gold); }
+
+    /* Password gate */
+    .pwd-gate { display: flex; flex-direction: column; gap: 0.85rem; }
+
+    /* ─── TOAST ─────────────────────────────────────────── */
+    #toast {
+      position: fixed; bottom: 2rem; right: 2rem; z-index: 300;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-left: 3px solid var(--gold);
+      padding: 0.85rem 1.25rem;
+      border-radius: 2px; box-shadow: var(--shadow);
+      font-size: 0.9rem; color: var(--text);
+      opacity: 0; transform: translateY(8px);
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none; max-width: 300px;
+    }
+    #toast.show { opacity: 1; transform: translateY(0); }
+    #toast.error { border-left-color: var(--red); }
+
+    /* ─── SPINNER ───────────────────────────────────────── */
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid var(--border);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── LOADING STATE ─────────────────────────────────── */
+    .loading-row {
+      display: flex; align-items: center; gap: 0.6rem;
+      color: var(--text-3); font-size: 0.9rem; padding: 1rem 0;
+    }
+
+    /* ─── FOOTER ────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem;
+      text-align: center;
+      color: var(--text-3);
+      font-size: 0.85rem;
+    }
+    footer .f-logo {
+      font-family: 'IM Fell English', serif;
+      color: var(--gold); font-size: 1.3rem;
+      display: block; margin-bottom: 0.5rem;
+    }
+
+    /* ─── RESPONSIVE ─────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .header-inner { padding: 0 1rem; }
+      .main-wrap { padding: 0 1rem; }
+      .hero { padding: 3rem 1rem 2.5rem; }
+      .post-card { padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── HEADER ─────────────────────────────────────────── -->
+  <header>
+    <div class="header-inner">
+      <a href="#inicio" class="logo" onclick="showSection('inicio')">
+        <span class="logo-greek">φίλος σοφία</span>
+        <span class="logo-sub">amigo de la sabiduría</span>
+      </a>
+      <nav>
+        <a href="#inicio" onclick="showSection('inicio')" class="active" id="nav-inicio">Inicio</a>
+        <a href="#biblioteca" onclick="showSection('biblioteca')" id="nav-biblioteca">Biblioteca</a>
+        <a href="#comentarios" onclick="showSection('comentarios')" id="nav-comentarios">Ágora</a>
+        <button class="btn-secondary theme-btn" onclick="toggleTheme()" title="Cambiar tema" id="theme-icon">☽</button>
+        <button class="btn admin-btn" onclick="openAdmin()">⊕ Admin</button>
+      </nav>
+    </div>
+    <div class="greek-border"></div>
+  </header>
+
+  <!-- ── HERO ────────────────────────────────────────────── -->
+  <section class="hero" id="inicio">
+    <div class="hero-ornament">❧ ✦ ❧</div>
+    <h1 class="hero-title">φίλος <span>σοφία</span></h1>
+    <p class="hero-tagline">Un espacio para el pensamiento, la contemplación y el amor al saber</p>
+    <div class="hero-divider">✦</div>
+  </section>
+
+  <!-- ── MAIN CONTENT ─────────────────────────────────────── -->
+  <div class="main-wrap">
+
+    <!-- SECTION: INICIO (Blog) -->
+    <div id="sec-inicio">
+      <div class="layout">
+        <!-- Posts -->
+        <main>
+          <p class="section-title">Últimas Entradas</p>
+          <div class="posts" id="posts-container">
+            <div class="loading-row"><span class="spinner"></span> Cargando entradas…</div>
+          </div>
+        </main>
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+          <div class="widget">
+            <p class="section-title">Sobre este espacio</p>
+            <p style="color:var(--text-2);font-size:0.95rem;line-height:1.65">
+              <em>φίλος σοφία</em> — philos sophía, "amigo de la sabiduría". Un blog dedicado a la exploración filosófica, donde el pensamiento y la palabra son el camino.
+            </p>
+          </div>
+          <div class="widget">
+            <p class="section-title">Temas</p>
+            <div style="display:flex;flex-wrap:wrap;gap:0.4rem">
+              <span class="post-tag" style="cursor:pointer">Filosofía</span>
+              <span class="post-tag" style="cursor:pointer">Ética</span>
+              <span class="post-tag" style="cursor:pointer">Estoicismo</span>
+              <span class="post-tag" style="cursor:pointer">Epistemología</span>
+              <span class="post-tag" style="cursor:pointer">Metafísica</span>
+              <span class="post-tag" style="cursor:pointer">Política</span>
+              <span class="post-tag" style="cursor:pointer">Estética</span>
+            </div>
+          </div>
+          <div class="widget">
+            <p class="section-title">Biblioteca</p>
+            <p style="color:var(--text-2);font-size:0.88rem;margin-bottom:0.75rem">
+              Textos filosóficos para descargar libremente.
+            </p>
+            <button class="btn btn-secondary" style="width:100%;justify-content:center" onclick="showSection('biblioteca')">
+              Ver todos los textos →
+            </button>
+          </div>
+        </aside>
+      </div>
+    </div><!-- /sec-inicio -->
+
+    <!-- SECTION: BIBLIOTECA (PDFs) -->
+    <div id="sec-biblioteca" style="display:none;padding:3rem 0">
+      <p class="section-title" id="biblioteca">Biblioteca · Textos & Documentos</p>
+      <div id="pdf-list">
+        <div class="loading-row"><span class="spinner"></span> Cargando textos…</div>
+      </div>
+    </div>
+
+    <!-- SECTION: COMENTARIOS (Ágora) -->
+    <div id="sec-comentarios" style="display:none;padding:3rem 0">
+      <p class="section-title" id="comentarios">Ágora · Comentarios del Ágora</p>
+
+      <div class="layout">
+        <div>
+          <p class="section-title">Voces de la Comunidad</p>
+          <div class="comments-list" id="comments-list">
+            <div class="loading-row"><span class="spinner"></span> Cargando comentarios…</div>
+          </div>
+
+          <!-- Comment form -->
+          <p class="section-title" style="margin-top:2rem">Unirse al Diálogo</p>
+          <div class="comment-form" id="comment-form">
+            <!-- Avatar upload -->
+            <div class="form-group">
+              <label>Avatar (opcional)</label>
+              <div class="avatar-upload-area" onclick="document.getElementById('avatar-file').click()">
+                <div class="avatar-preview" id="avatar-preview-wrap">
+                  <span id="avatar-preview-icon">👤</span>
+                  <img id="avatar-preview-img" src="" alt="" style="display:none;width:100%;height:100%;border-radius:50%;object-fit:cover" />
+                </div>
+                <div class="avatar-upload-text">
+                  <span>Subir imagen de perfil</span>
+                  <small>JPG, PNG, GIF · máx. 2MB</small>
+                </div>
+              </div>
+              <input type="file" id="avatar-file" accept="image/*" onchange="previewAvatar(event)" />
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="c-name">Nombre *</label>
+                <input type="text" id="c-name" placeholder="Sócrates de Atenas" maxlength="80" />
+              </div>
+              <div class="form-group">
+                <label for="c-email">Email (privado, opcional)</label>
+                <input type="email" id="c-email" placeholder="tu@correo.com" />
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="c-text">Tu pensamiento *</label>
+              <textarea id="c-text" placeholder="Comparte tu reflexión, pregunta o refutación…" maxlength="1200"></textarea>
+            </div>
+            <div>
+              <button class="btn btn-primary" id="submit-comment-btn" onclick="submitComment()">
+                ✦ Publicar en el Ágora
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar: stats/info -->
+        <aside class="sidebar">
+          <div class="widget">
+            <p class="section-title">El Ágora</p>
+            <p style="color:var(--text-2);font-size:0.92rem;line-height:1.65">
+              El ágora ateniense era el espacio público del debate libre. Aquí, toda voz es bienvenida: la duda, la pregunta y la refutación son tan valiosas como la certeza.
+            </p>
+          </div>
+          <div class="widget">
+            <p class="section-title">Normas del Diálogo</p>
+            <ul style="color:var(--text-2);font-size:0.88rem;line-height:1.8;padding-left:1rem">
+              <li>Habla con sinceridad</li>
+              <li>Escucha antes de responder</li>
+              <li>Pregunta con humildad</li>
+              <li>Critica las ideas, no las personas</li>
+            </ul>
+          </div>
+        </aside>
+      </div>
+    </div><!-- /sec-comentarios -->
+
+  </div><!-- /main-wrap -->
+
+  <!-- ── FOOTER ────────────────────────────────────────────── -->
+  <footer>
+    <div class="greek-border" style="margin-bottom:1.5rem"></div>
+    <span class="f-logo">φίλος σοφία</span>
+    <p>Amor a la sabiduría · Desplegado en Cloudflare Pages</p>
+  </footer>
+
+  <!-- ── POST READER MODAL ──────────────────────────────────── -->
+  <div class="modal-overlay" id="post-overlay" onclick="closePost(event)">
+    <div class="modal modal-post" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <span class="modal-title" id="post-modal-title"></span>
+        <button class="close-btn" onclick="closePost()">×</button>
+      </div>
+      <div id="post-modal-meta" style="font-size:0.82rem;color:var(--text-3);margin-bottom:1.2rem;display:flex;flex-wrap:wrap;gap:0.4rem;align-items:center"></div>
+      <div id="post-modal-body" style="color:var(--text-2);line-height:1.9;font-size:1rem;white-space:pre-wrap"></div>
+    </div>
+  </div>
+
+  <!-- ── ADMIN MODAL ────────────────────────────────────────── -->
+  <div class="modal-overlay" id="admin-overlay" onclick="closeAdmin(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <span class="modal-title">Panel de Administración</span>
+        <button class="close-btn" onclick="closeAdmin()">×</button>
+      </div>
+
+      <!-- Password gate -->
+      <div id="admin-pwd-gate" class="pwd-gate">
+        <p style="color:var(--text-2);font-size:0.9rem;margin-bottom:0.5rem">
+          Ingresa la contraseña de administrador:
+        </p>
+        <div class="form-group">
+          <label>Contraseña</label>
+          <input type="password" id="admin-pwd-input" placeholder="••••••••"
+                 onkeydown="if(event.key==='Enter')checkAdminPwd()" />
+        </div>
+        <button class="btn btn-primary" onclick="checkAdminPwd()">Acceder</button>
+      </div>
+
+      <!-- Admin panel (after auth) -->
+      <div id="admin-panel" style="display:none">
+
+        <!-- ── NEW / EDIT POST ── -->
+        <p class="section-title" style="margin-bottom:1rem">✦ Nueva Entrada</p>
+        <div id="post-edit-notice" style="display:none;font-size:0.82rem;color:var(--gold);margin-bottom:0.6rem">Editando entrada existente — <button class="read-more" style="font-size:0.82rem" onclick="cancelEditPost()">cancelar</button></div>
+        <div class="form-group" style="margin-bottom:0.85rem">
+          <label>Título</label>
+          <input type="text" id="post-title" placeholder="Ej: La caverna de Platón…" maxlength="200" />
+        </div>
+        <div class="form-group" style="margin-bottom:0.85rem">
+          <label>Etiquetas <small style="color:var(--text-3)">(separadas por coma)</small></label>
+          <input type="text" id="post-tags" placeholder="Filosofía, Epistemología" maxlength="200" />
+        </div>
+        <div class="form-group" style="margin-bottom:0.85rem">
+          <label>Contenido</label>
+          <textarea id="post-body" rows="10" placeholder="Escribe tu entrada filosófica aquí…" style="width:100%;resize:vertical"></textarea>
+        </div>
+        <button class="btn btn-primary" id="save-post-btn" onclick="savePost()">✦ Publicar entrada</button>
+
+        <hr style="margin:1.5rem 0;border-color:var(--border)" />
+        <p class="section-title">Entradas publicadas</p>
+        <div id="admin-post-list" style="font-size:0.88rem;color:var(--text-2)">
+          <div class="loading-row"><span class="spinner"></span></div>
+        </div>
+
+        <hr style="margin:1.5rem 0;border-color:var(--border)" />
+        <p class="section-title" style="margin-bottom:1rem">Subir PDF a la Biblioteca</p>
+        <div class="form-group" style="margin-bottom:0.85rem">
+          <label>Título del texto</label>
+          <input type="text" id="pdf-title" placeholder="Ej: República – Platón" />
+        </div>
+        <div class="form-group" style="margin-bottom:0.85rem">
+          <label>Descripción breve</label>
+          <input type="text" id="pdf-desc" placeholder="Ej: Diálogo político sobre la justicia" />
+        </div>
+        <div class="upload-zone" id="pdf-drop-zone"
+             onclick="document.getElementById('pdf-file-input').click()"
+             ondragover="handleDragOver(event)" ondrop="handleDrop(event)" ondragleave="handleDragLeave(event)">
+          <div class="upload-zone-icon">📄</div>
+          <p><strong>Haz clic o arrastra un PDF</strong></p>
+          <p id="pdf-file-name" style="color:var(--text-3);font-size:0.82rem;margin-top:0.3rem">Ningún archivo seleccionado</p>
+        </div>
+        <input type="file" id="pdf-file-input" accept=".pdf" onchange="onPdfSelected(event)" />
+        <button class="btn btn-primary" id="upload-pdf-btn" onclick="uploadPdf()" style="margin-top:0.85rem">
+          ↑ Subir texto
+        </button>
+        <hr style="margin:1.5rem 0;border-color:var(--border)" />
+        <p class="section-title">PDFs en biblioteca</p>
+        <div id="admin-pdf-list" style="font-size:0.88rem;color:var(--text-2)">
+          <div class="loading-row"><span class="spinner"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── TOAST ─────────────────────────────────────────────── -->
+  <div id="toast"></div>
+
+  <!-- ── JAVASCRIPT ─────────────────────────────────────────── -->
+  <script>
+  /* ─── THEME ───────────────────────────────────────── */
+  let currentTheme = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', currentTheme);
+  updateThemeIcon();
+
+  function toggleTheme() {
+    currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    localStorage.setItem('theme', currentTheme);
+    updateThemeIcon();
+  }
+  function updateThemeIcon() {
+    document.getElementById('theme-icon').textContent = currentTheme === 'dark' ? '☀' : '☽';
+  }
+
+  /* ─── NAVIGATION ──────────────────────────────────── */
+  function showSection(name) {
+    ['inicio','biblioteca','comentarios'].forEach(s => {
+      document.getElementById('sec-'+s).style.display = s === name ? '' : 'none';
+      document.getElementById('nav-'+s)?.classList.toggle('active', s === name);
+    });
+    if (name === 'inicio')      loadPosts();
+    if (name === 'biblioteca')  loadPdfs();
+    if (name === 'comentarios') loadComments();
+    window.scrollTo({top: 0, behavior: 'smooth'});
+  }
+
+  // Auto-load posts on page open
+  loadPosts();
+
+  /* ─── POSTS ────────────────────────────────────────── */
+  async function loadPosts() {
+    const el = document.getElementById('posts-container');
+    el.innerHTML = '<div class="loading-row"><span class="spinner"></span> Cargando entradas…</div>';
+    try {
+      const r    = await fetch('/api/posts');
+      const data = await r.json();
+      renderPosts(el, data.posts || []);
+    } catch {
+      el.innerHTML = '<p style="color:var(--text-3);padding:1rem">Error al cargar entradas.</p>';
+    }
+  }
+
+  function renderPosts(el, posts) {
+    if (!posts.length) {
+      el.innerHTML = '<p style="color:var(--text-3);font-style:italic;padding:1rem 0">Aún no hay entradas. El administrador puede publicar la primera desde el panel.</p>';
+      return;
+    }
+    el.innerHTML = posts.map(p => `
+      <article class="post-card" onclick="openPost('${p.id}')">
+        <div class="post-meta">
+          ${(p.tags||[]).map(t => `<span class="post-tag">${esc(t)}</span>`).join('')}
+          ${formatDate(p.created_at)}
+        </div>
+        <h2 class="post-title">${esc(p.title)}</h2>
+        <p class="post-excerpt">${esc((p.excerpt||'').slice(0,240))}${p.excerpt && p.excerpt.length >= 240 ? '…' : ''}</p>
+        <div class="post-footer">
+          <button class="read-more">Leer más →</button>
+        </div>
+      </article>`).join('');
+  }
+
+  async function openPost(id) {
+    document.getElementById('post-modal-title').textContent = '…';
+    document.getElementById('post-modal-meta').innerHTML = '';
+    document.getElementById('post-modal-body').textContent = '';
+    document.getElementById('post-overlay').classList.add('open');
+    try {
+      const r    = await fetch(`/api/posts/${id}`);
+      const data = await r.json();
+      const p    = data.post;
+      document.getElementById('post-modal-title').textContent = p.title;
+      document.getElementById('post-modal-meta').innerHTML =
+        (p.tags||[]).map(t => `<span class="post-tag">${esc(t)}</span>`).join('') +
+        `<span style="margin-left:0.3rem">${formatDate(p.created_at)}</span>`;
+      document.getElementById('post-modal-body').textContent = p.body;
+    } catch {
+      document.getElementById('post-modal-body').textContent = 'Error al cargar la entrada.';
+    }
+  }
+  function closePost(e) {
+    if (!e || e.target === document.getElementById('post-overlay'))
+      document.getElementById('post-overlay').classList.remove('open');
+  }
+
+  /* ─── ADMIN — POSTS ────────────────────────────────── */
+  let editingPostId = null;
+
+  async function loadAdminPosts() {
+    const el = document.getElementById('admin-post-list');
+    el.innerHTML = '<div class="loading-row"><span class="spinner"></span></div>';
+    try {
+      const r    = await fetch('/api/posts');
+      const data = await r.json();
+      const posts = data.posts || [];
+      if (!posts.length) { el.textContent = 'Sin entradas aún.'; return; }
+      el.innerHTML = posts.map(p => `
+        <div style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0;border-bottom:1px solid var(--border)">
+          <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.title)}</span>
+          <button class="pdf-dl" onclick="startEditPost('${p.id}','${esc(p.title).replace(/'/g,"\\'")}')">✎</button>
+          <button class="pdf-dl" style="color:var(--red);border-color:var(--red)" onclick="deleteAdminPost('${p.id}')">✕</button>
+        </div>`).join('');
+    } catch { el.textContent = 'Error al cargar'; }
+  }
+
+  async function startEditPost(id, title) {
+    // Fetch full post
+    try {
+      const r    = await fetch(`/api/posts/${id}`);
+      const data = await r.json();
+      const p    = data.post;
+      editingPostId = id;
+      document.getElementById('post-title').value = p.title;
+      document.getElementById('post-tags').value  = (p.tags||[]).join(', ');
+      document.getElementById('post-body').value  = p.body;
+      document.getElementById('post-edit-notice').style.display = '';
+      document.getElementById('save-post-btn').textContent = '✦ Guardar cambios';
+      document.getElementById('post-title').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } catch { showToast('Error al cargar entrada', 'error'); }
+  }
+
+  function cancelEditPost() {
+    editingPostId = null;
+    document.getElementById('post-title').value = '';
+    document.getElementById('post-tags').value  = '';
+    document.getElementById('post-body').value  = '';
+    document.getElementById('post-edit-notice').style.display = 'none';
+    document.getElementById('save-post-btn').textContent = '✦ Publicar entrada';
+  }
+
+  async function savePost() {
+    const title = document.getElementById('post-title').value.trim();
+    const body  = document.getElementById('post-body').value.trim();
+    const tags  = document.getElementById('post-tags').value.split(',').map(t => t.trim()).filter(Boolean);
+
+    if (!title) return showToast('Ingresa un título', 'error');
+    if (!body)  return showToast('El contenido no puede estar vacío', 'error');
+
+    const btn = document.getElementById('save-post-btn');
+    btn.innerHTML = '<span class="spinner"></span> Guardando…'; btn.disabled = true;
+
+    try {
+      const url    = editingPostId ? `/api/posts/${editingPostId}` : '/api/posts';
+      const method = editingPostId ? 'PUT' : 'POST';
+      const r      = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, body, tags }),
+      });
+      const data = await r.json();
+      if (r.ok) {
+        showToast(editingPostId ? '✓ Entrada actualizada' : '✓ Entrada publicada');
+        cancelEditPost();
+        loadAdminPosts();
+        loadPosts();
+      } else {
+        showToast(data.error || 'Error al guardar', 'error');
+      }
+    } catch { showToast('Error de conexión', 'error'); }
+    finally {
+      btn.innerHTML = editingPostId ? '✦ Guardar cambios' : '✦ Publicar entrada';
+      btn.disabled = false;
+    }
+  }
+
+  async function deleteAdminPost(id) {
+    if (!confirm('¿Eliminar esta entrada permanentemente?')) return;
+    try {
+      const r = await fetch(`/api/posts/${id}`, { method: 'DELETE' });
+      if (r.ok) { showToast('Entrada eliminada'); loadAdminPosts(); loadPosts(); }
+      else showToast('Error al eliminar', 'error');
+    } catch { showToast('Error de conexión', 'error'); }
+  }
+
+  /* ─── TOAST ────────────────────────────────────────── */
+  let toastTimer;
+  function showToast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'show' + (type ? ' '+type : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.className = '', 3200);
+  }
+
+  /* ─── ADMIN MODAL ──────────────────────────────────── */
+  const ADMIN_PASSWORD = 'sofia2024'; // Change this!
+  let adminAuthed = false;
+
+  function openAdmin() {
+    document.getElementById('admin-overlay').classList.add('open');
+    if (adminAuthed) {
+      document.getElementById('admin-pwd-gate').style.display = 'none';
+      document.getElementById('admin-panel').style.display = '';
+      loadAdminPosts();
+      loadAdminPdfs();
+    }
+  }
+  function closeAdmin(e) {
+    if (!e || e.target === document.getElementById('admin-overlay'))
+      document.getElementById('admin-overlay').classList.remove('open');
+  }
+  function checkAdminPwd() {
+    const val = document.getElementById('admin-pwd-input').value;
+    if (val === ADMIN_PASSWORD) {
+      adminAuthed = true;
+      document.getElementById('admin-pwd-gate').style.display = 'none';
+      document.getElementById('admin-panel').style.display = '';
+      loadAdminPosts();
+      loadAdminPdfs();
+    } else {
+      showToast('Contraseña incorrecta', 'error');
+      document.getElementById('admin-pwd-input').value = '';
+    }
+  }
+
+  /* ─── PDF UPLOAD ───────────────────────────────────── */
+  let selectedPdfFile = null;
+
+  function handleDragOver(e) { e.preventDefault(); e.currentTarget.classList.add('drag'); }
+  function handleDragLeave(e) { e.currentTarget.classList.remove('drag'); }
+  function handleDrop(e) {
+    e.preventDefault(); e.currentTarget.classList.remove('drag');
+    const file = e.dataTransfer.files[0];
+    if (file?.type === 'application/pdf') { selectedPdfFile = file; document.getElementById('pdf-file-name').textContent = file.name; }
+    else showToast('Solo se aceptan archivos PDF', 'error');
+  }
+  function onPdfSelected(e) {
+    const file = e.target.files[0];
+    if (file) { selectedPdfFile = file; document.getElementById('pdf-file-name').textContent = file.name; }
+  }
+
+  async function uploadPdf() {
+    const title = document.getElementById('pdf-title').value.trim();
+    const desc  = document.getElementById('pdf-desc').value.trim();
+    if (!title) return showToast('Ingresa un título', 'error');
+    if (!selectedPdfFile) return showToast('Selecciona un PDF', 'error');
+    if (selectedPdfFile.size > 20 * 1024 * 1024) return showToast('PDF demasiado grande (máx 20MB)', 'error');
+
+    const btn = document.getElementById('upload-pdf-btn');
+    btn.innerHTML = '<span class="spinner"></span> Subiendo…'; btn.disabled = true;
+
+    const fd = new FormData();
+    fd.append('title', title);
+    fd.append('description', desc);
+    fd.append('file', selectedPdfFile);
+
+    try {
+      const r = await fetch('/api/pdfs', { method: 'POST', body: fd });
+      const data = await r.json();
+      if (r.ok) {
+        showToast('✓ Texto subido correctamente');
+        document.getElementById('pdf-title').value = '';
+        document.getElementById('pdf-desc').value = '';
+        document.getElementById('pdf-file-name').textContent = 'Ningún archivo seleccionado';
+        selectedPdfFile = null;
+        document.getElementById('pdf-file-input').value = '';
+        loadAdminPdfs();
+        if (document.getElementById('sec-biblioteca').style.display !== 'none') loadPdfs();
+      } else {
+        showToast(data.error || 'Error al subir', 'error');
+      }
+    } catch(err) {
+      showToast('Error de conexión', 'error');
+    } finally {
+      btn.innerHTML = '↑ Subir texto'; btn.disabled = false;
+    }
+  }
+
+  /* ─── LOAD PDFs ────────────────────────────────────── */
+  async function loadPdfs() {
+    const el = document.getElementById('pdf-list');
+    el.innerHTML = '<div class="loading-row"><span class="spinner"></span> Cargando…</div>';
+    try {
+      const r = await fetch('/api/pdfs');
+      const data = await r.json();
+      renderPdfs(el, data.pdfs || []);
+    } catch { el.innerHTML = '<p style="color:var(--text-3);padding:1rem">Error al cargar. Asegúrate de tener la API activa.</p>'; }
+  }
+
+  function renderPdfs(el, pdfs) {
+    if (!pdfs.length) {
+      el.innerHTML = '<div class="pdf-empty">Aún no hay textos en la biblioteca.<br><small>Los administradores pueden subir PDFs desde el panel.</small></div>';
+      return;
+    }
+    el.innerHTML = `<div class="pdf-grid">${pdfs.map(p => `
+      <div class="pdf-item">
+        <div class="pdf-icon">PDF</div>
+        <div class="pdf-info">
+          <div class="pdf-name">${esc(p.title)}</div>
+          <div class="pdf-desc">${esc(p.description || '')} · ${formatDate(p.created_at)}</div>
+        </div>
+        <button class="pdf-dl" onclick="downloadPdf('${p.id}','${esc(p.title)}')">↓ Descargar</button>
+      </div>`).join('')}</div>`;
+  }
+
+  async function loadAdminPdfs() {
+    const el = document.getElementById('admin-pdf-list');
+    el.innerHTML = '<div class="loading-row"><span class="spinner"></span></div>';
+    try {
+      const r = await fetch('/api/pdfs');
+      const data = await r.json();
+      const pdfs = data.pdfs || [];
+      if (!pdfs.length) { el.textContent = 'Sin textos aún.'; return; }
+      el.innerHTML = pdfs.map(p => `
+        <div style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0;border-bottom:1px solid var(--border)">
+          <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.title)}</span>
+          <button class="pdf-dl" style="color:var(--red);border-color:var(--red)" onclick="deletePdf('${p.id}')">✕</button>
+        </div>`).join('');
+    } catch { el.textContent = 'Error al cargar'; }
+  }
+
+  async function downloadPdf(id, title) {
+    try {
+      const r = await fetch(`/api/pdfs/${id}`);
+      if (!r.ok) return showToast('No se pudo obtener el PDF', 'error');
+      const blob = await r.blob();
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = title.replace(/[^a-z0-9áéíóúüñ ]/gi,'_') + '.pdf';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    } catch { showToast('Error de descarga', 'error'); }
+  }
+
+  async function deletePdf(id) {
+    if (!confirm('¿Eliminar este texto de la biblioteca?')) return;
+    try {
+      const r = await fetch(`/api/pdfs/${id}`, { method: 'DELETE' });
+      if (r.ok) { showToast('Texto eliminado'); loadAdminPdfs(); }
+      else showToast('Error al eliminar', 'error');
+    } catch { showToast('Error de conexión', 'error'); }
+  }
+
+  /* ─── COMMENTS ─────────────────────────────────────── */
+  async function loadComments() {
+    const el = document.getElementById('comments-list');
+    el.innerHTML = '<div class="loading-row"><span class="spinner"></span> Cargando…</div>';
+    try {
+      const r = await fetch('/api/comments');
+      const data = await r.json();
+      renderComments(el, data.comments || []);
+    } catch { el.innerHTML = '<p style="color:var(--text-3)">Error al cargar comentarios.</p>'; }
+  }
+
+  function renderComments(el, comments) {
+    if (!comments.length) {
+      el.innerHTML = '<p style="color:var(--text-3);font-style:italic;padding:1rem 0">Sé el primero en compartir tu pensamiento en el ágora.</p>';
+      return;
+    }
+    el.innerHTML = comments.map(c => {
+      const initial = (c.name || '?')[0].toUpperCase();
+      const avatarHtml = c.avatar_url
+        ? `<img class="avatar" src="${c.avatar_url}" alt="${esc(c.name)}" />`
+        : `<div class="avatar-placeholder">${initial}</div>`;
+      return `<div class="comment-item">
+        ${avatarHtml}
+        <div class="comment-body">
+          <div class="comment-header">
+            <span class="comment-name">${esc(c.name)}</span>
+            <span class="comment-date">${formatDate(c.created_at)}</span>
+          </div>
+          <p class="comment-text">${esc(c.text)}</p>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function previewAvatar(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) return showToast('Imagen muy grande (máx 2MB)', 'error');
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const img = document.getElementById('avatar-preview-img');
+      const icon = document.getElementById('avatar-preview-icon');
+      img.src = ev.target.result;
+      img.style.display = 'block';
+      icon.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function submitComment() {
+    const name = document.getElementById('c-name').value.trim();
+    const text = document.getElementById('c-text').value.trim();
+    const avatarFile = document.getElementById('avatar-file').files[0];
+
+    if (!name) return showToast('Ingresa tu nombre', 'error');
+    if (!text) return showToast('Escribe tu comentario', 'error');
+    if (text.length < 5) return showToast('Comentario muy corto', 'error');
+
+    const btn = document.getElementById('submit-comment-btn');
+    btn.innerHTML = '<span class="spinner"></span> Publicando…'; btn.disabled = true;
+
+    const fd = new FormData();
+    fd.append('name', name);
+    fd.append('text', text);
+    if (document.getElementById('c-email').value.trim())
+      fd.append('email', document.getElementById('c-email').value.trim());
+    if (avatarFile) fd.append('avatar', avatarFile);
+
+    try {
+      const r = await fetch('/api/comments', { method: 'POST', body: fd });
+      const data = await r.json();
+      if (r.ok) {
+        showToast('✓ Tu voz ha sido añadida al ágora');
+        document.getElementById('c-name').value = '';
+        document.getElementById('c-text').value = '';
+        document.getElementById('c-email').value = '';
+        document.getElementById('avatar-file').value = '';
+        document.getElementById('avatar-preview-img').style.display = 'none';
+        document.getElementById('avatar-preview-icon').style.display = 'inline';
+        loadComments();
+      } else {
+        showToast(data.error || 'Error al publicar', 'error');
+      }
+    } catch { showToast('Error de conexión', 'error'); }
+    finally { btn.innerHTML = '✦ Publicar en el Ágora'; btn.disabled = false; }
+  }
+
+  /* ─── HELPERS ──────────────────────────────────────── */
+  function esc(s = '') {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function formatDate(iso) {
+    if (!iso) return '';
+    try {
+      return new Date(iso).toLocaleDateString('es-ES', { year:'numeric', month:'long', day:'numeric' });
+    } catch { return iso; }
+  }
+  </script>
+</body>
+</html>
