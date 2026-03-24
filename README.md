@@ -1,24 +1,53 @@
-# φίλος σοφία — Blog + Biblioteca
+# φίλος σοφία
 
-Un blog filosófico con biblioteca de PDFs y ágora de comentarios,  
-desplegado sobre **Cloudflare Pages + R2 + KV**.
+Un espacio digital dedicado a la filosofía, la reflexión y el amor al saber.  
+Blog, biblioteca de PDFs, videoteca, aforismos, noticias y ágora pública.
+
+Desplegado sobre **Cloudflare Pages + R2 + KV + D1**.
 
 ---
 
 ## Arquitectura
 
+| Servicio | Uso |
+|----------|-----|
+| **Cloudflare Pages** | Frontend estático + Functions (API serverless) |
+| **Cloudflare R2** | Almacenamiento de PDFs, avatares e imágenes |
+| **Cloudflare KV** | Posts, índice de PDFs, comentarios, noticias |
+| **Cloudflare D1** | Aforismos (quotes) y videos |
+
+---
+
+## Estructura del proyecto
+
 ```
-Cloudflare Pages  →  public/index.html   (frontend estático)
-                 →  functions/api/[[route]].js  (API serverless)
-Cloudflare R2    →  PDFs + avatares de usuarios
-Cloudflare KV    →  Índice de PDFs + comentarios (JSON)
+filos-sofia/
+├── public/
+│   ├── index.html          Inicio — blog + feed de noticias
+│   ├── biblioteca.html     Biblioteca de PDFs descargables
+│   ├── agora.html          Comentarios públicos con avatar
+│   ├── aforismos.html      Citas y sentencias con retrato
+│   ├── videoteca.html      Videos de YouTube embebidos
+│   ├── admin.html          Panel de administración
+│   └── style.css           Estilos globales (tema claro/oscuro)
+├── functions/api/
+│   ├── [[route]].js        API principal — auth, posts, news, pdfs, comments, avatars
+│   ├── quotes.js           GET/POST aforismos (D1)
+│   ├── quotes/[id].js      DELETE aforismo
+│   ├── videos.js           GET/POST videos (D1)
+│   ├── videos/[id].js      DELETE video
+│   ├── pdfs/[id].js        GET/DELETE pdf individual
+│   └── media.js            Servir imágenes desde R2
+├── schema.sql              Tablas D1
+├── wrangler.toml           Configuración Cloudflare
+└── README.md
 ```
 
 ---
 
-## Despliegue paso a paso
+## Despliegue
 
-### 1. Requisitos previos
+### 1. Instalar Wrangler y autenticarse
 
 ```bash
 npm install -g wrangler
@@ -28,87 +57,63 @@ wrangler login
 ### 2. Crear recursos en Cloudflare
 
 ```bash
-# Crear bucket R2 para archivos
 npx wrangler r2 bucket create filos-sofia-bucket
-
-# Crear namespace KV para datos
 npx wrangler kv:namespace create "FILOS_KV"
-# → Copia el "id" que te devuelve y pégalo en wrangler.toml
 ```
 
-### 3. Editar wrangler.toml
+Copiar los IDs generados en `wrangler.toml`.
 
-Abre `wrangler.toml` y reemplaza:
-```toml
-id = "YOUR_KV_NAMESPACE_ID"   # ← el id del paso anterior
+### 3. Crear tablas en D1
+
+```bash
+npx wrangler d1 execute quotes --file=schema.sql
 ```
 
-### 4. (Opcional) Cambiar la contraseña de admin
+### 4. Configurar contraseña de admin
 
-En `public/index.html`, busca esta línea y cambia la contraseña:
-```js
-const ADMIN_PASSWORD = 'sofia2024';   // ← cámbiala
+```bash
+npx wrangler pages secret put ADMIN_PASSWORD
 ```
-> Para mayor seguridad, puedes mover la validación al Worker y guardar  
-> la contraseña como secreto: `wrangler secret put ADMIN_PASSWORD`
+
+Escribir la contraseña cuando la pida. Se valida en el servidor — nunca aparece en el código fuente.
 
 ### 5. Desplegar
 
+**Opción A — Manual:**
 ```bash
 npx wrangler pages deploy public
 ```
 
-O conecta tu repositorio Git en el panel de Cloudflare Pages  
-(**Settings → Builds & deployments → Connect to Git**) y Cloudflare  
-desplegará automáticamente en cada push.
-
-### 6. Variables de entorno en el panel
-
-Si usas secretos (ej: contraseña de admin en el Worker), agrégalos en:  
-**Cloudflare Dashboard → Pages → tu-proyecto → Settings → Environment variables**
+**Opción B — Git (auto-deploy):**  
+Conectar el repo en Cloudflare Dashboard → Pages → Settings → Builds & deployments → Connect to Git.
 
 ---
 
-## Estructura del proyecto
-
-```
-filos-sofia/
-├── public/
-│   └── index.html          ← Blog completo (HTML/CSS/JS)
-├── functions/
-│   └── api/
-│       └── [[route]].js    ← API: PDFs + Comentarios
-├── wrangler.toml           ← Configuración Cloudflare
-└── README.md               ← Este archivo
-```
-
----
-
-## API Endpoints
+## API
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| GET | `/api/pdfs` | Listar PDFs de la biblioteca |
-| POST | `/api/pdfs` | Subir nuevo PDF (multipart) |
-| GET | `/api/pdfs/:id` | Descargar PDF |
-| DELETE | `/api/pdfs/:id` | Eliminar PDF |
-| GET | `/api/comments` | Listar comentarios |
-| POST | `/api/comments` | Publicar comentario (con avatar opcional) |
-
----
-
-## Personalización
-
-### Cambiar los posts de ejemplo
-Edita la sección `<div class="posts">` en `public/index.html` con tus propios artículos.
-
-### Agregar posts dinámicos desde KV
-Extiende la API con:
-- `GET /api/posts` → lista posts
-- `POST /api/posts` → crear post (admin)
-
-### Dominio personalizado
-En Cloudflare Pages → Custom domains → Agrega tu dominio.
+| `POST` | `/api/auth` | Validar contraseña admin |
+| `GET` | `/api/posts` | Listar entradas |
+| `POST` | `/api/posts` | Crear entrada |
+| `GET` | `/api/posts/:id` | Obtener entrada completa |
+| `PUT` | `/api/posts/:id` | Editar entrada |
+| `DELETE` | `/api/posts/:id` | Eliminar entrada |
+| `GET` | `/api/news` | Listar noticias |
+| `POST` | `/api/news` | Crear noticia |
+| `DELETE` | `/api/news/:id` | Eliminar noticia |
+| `GET` | `/api/pdfs` | Listar biblioteca |
+| `POST` | `/api/pdfs` | Subir PDF (multipart) |
+| `GET` | `/api/pdfs/:id` | Descargar PDF |
+| `DELETE` | `/api/pdfs/:id` | Eliminar PDF |
+| `GET` | `/api/quotes` | Listar aforismos |
+| `POST` | `/api/quotes` | Crear aforismo (multipart, imagen opcional) |
+| `DELETE` | `/api/quotes/:id` | Eliminar aforismo |
+| `GET` | `/api/videos` | Listar videos |
+| `POST` | `/api/videos` | Añadir video de YouTube |
+| `DELETE` | `/api/videos/:id` | Eliminar video |
+| `GET` | `/api/comments` | Listar comentarios del ágora |
+| `POST` | `/api/comments` | Publicar comentario (multipart, avatar opcional) |
 
 ---
 
