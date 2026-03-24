@@ -94,14 +94,25 @@
   <div id="toast"></div>
 
   <script>
-    const ADMIN_PASSWORD = 'sofia2024'; 
-
-    function checkAdminPwd() {
-      if (document.getElementById('admin-pwd-input').value === ADMIN_PASSWORD) {
-        document.getElementById('admin-pwd-gate').classList.add('hidden');
-        document.getElementById('admin-panel').classList.remove('hidden');
-        loadAdminPosts(); loadAdminNews(); loadAdminQuotes(); loadAdminPdfs(); loadAdminVideos();
-      } else { showToast('Contraseña incorrecta', 'error'); }
+    async function checkAdminPwd() {
+      const pwd = document.getElementById('admin-pwd-input').value;
+      try {
+        const r = await fetch('/api/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: pwd })
+        });
+        const data = await r.json();
+        if (data.ok) {
+          document.getElementById('admin-pwd-gate').classList.add('hidden');
+          document.getElementById('admin-panel').classList.remove('hidden');
+          loadAdminPosts(); loadAdminNews(); loadAdminQuotes(); loadAdminPdfs(); loadAdminVideos();
+        } else {
+          showToast('Contraseña incorrecta', 'error');
+        }
+      } catch {
+        showToast('Error de conexión', 'error');
+      }
     }
 
     /* ─── POSTS ─── */

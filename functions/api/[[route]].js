@@ -5,6 +5,7 @@
  * Bindings required (set in wrangler.toml or Cloudflare Dashboard):
  *   - R2 bucket:    FILOS_BUCKET
  *   - KV namespace: FILOS_KV
+ *   - Secret:       ADMIN_PASSWORD
  */
 
 const CORS_HEADERS = {
@@ -35,6 +36,9 @@ export async function onRequest(context) {
 
   const route  = (params.route || []).join('/');
   const method = request.method;
+
+  // ── Auth ──────────────────────────────────────────────────
+  if (route === 'auth' && method === 'POST') return checkAuth(request, env);
 
   // ── PDFs ─────────────────────────────────────────────────
   if (route === 'pdfs' && method === 'GET')  return listPdfs(env);
@@ -76,6 +80,20 @@ export async function onRequest(context) {
   if (avMatch && method === 'GET') return serveAvatar(avMatch[1], env);
 
   return err('Not found', 404);
+}
+
+// ─── AUTH HANDLER ────────────────────────────────────────────
+
+async function checkAuth(request, env) {
+  let data;
+  try { data = await request.json(); }
+  catch { return err('JSON inválido'); }
+
+  const password = (data.password || '').trim();
+  if (!password || password !== env.ADMIN_PASSWORD) {
+    return json({ ok: false }, 401);
+  }
+  return json({ ok: true });
 }
 
 // ─── PDF HANDLERS ────────────────────────────────────────────
