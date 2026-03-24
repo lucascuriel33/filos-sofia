@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel de Administración - φίλος σοφία</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <span class="logo">φίλος σοφία | Admin</span>
+      <a href="index.html" class="back-link" style="font-family: 'Cormorant Garamond', serif; color: var(--text-2);">← Volver al sitio público</a>
+    </div>
+  </header>
+
+  <div class="admin-container">
+    
+    <div id="admin-pwd-gate">
+      <p class="section-title">Autenticación Requerida</p>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="admin-pwd-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')checkAdminPwd()" />
+      </div>
+      <button class="btn btn-primary" onclick="checkAdminPwd()">Acceder</button>
+    </div>
+
+    <div id="admin-panel" class="hidden">
+      
+      <div style="margin-bottom: 3rem;">
+        <h2 class="section-title">Entradas del Blog</h2>
+        <div id="post-edit-notice" class="hidden" style="color:var(--gold);margin-bottom:1rem;font-size:0.9rem;">
+          Editando entrada — <button class="btn-secondary" style="border:none;padding:0;" onclick="cancelEditPost()">cancelar</button>
+        </div>
+        <div class="form-group"><label>Título</label><input type="text" id="post-title" /></div>
+        <div class="form-group"><label>Etiquetas</label><input type="text" id="post-tags" placeholder="Ej: Filosofía, Ética" /></div>
+        <div class="form-group"><label>Contenido</label><textarea id="post-body" rows="6"></textarea></div>
+        <button class="btn btn-primary" id="save-post-btn" onclick="savePost()">✦ Publicar entrada</button>
+        <div id="admin-post-list" style="margin-top:1.5rem;"><span class="spinner"></span> Cargando...</div>
+      </div>
+
+      <div style="margin-bottom: 3rem;">
+        <h2 class="section-title">Noticias (Feed lateral)</h2>
+        <div class="form-group"><label>Título *</label><input type="text" id="news-title" placeholder="Ej: Nuevo ciclo de conferencias" /></div>
+        <div class="form-group"><label>Resumen *</label><textarea id="news-summary" rows="2" placeholder="Breve descripción de la noticia…"></textarea></div>
+        <div class="form-group"><label>Enlace (opcional)</label><input type="text" id="news-url" placeholder="https://..." /></div>
+        <button class="btn btn-primary" onclick="saveNews()">✦ Publicar noticia</button>
+        <div id="admin-news-list" style="margin-top:1.5rem;"><span class="spinner"></span> Cargando...</div>
+      </div>
+
+      <div style="margin-bottom: 3rem;">
+        <h2 class="section-title">Videoteca (YouTube)</h2>
+        <div class="form-group"><label>Título del Video *</label><input type="text" id="video-title" placeholder="Ej: Entrevista a Byung-Chul Han" /></div>
+        <div class="form-group"><label>Descripción Breve</label><textarea id="video-desc" rows="2" placeholder="Opcional..."></textarea></div>
+        <div class="form-group">
+          <label>Enlace de YouTube *</label>
+          <input type="text" id="video-link" placeholder="Pega el enlace completo (ej: https://www.youtube.com/watch?v=...)" />
+        </div>
+        <button class="btn btn-primary" id="save-video-btn" onclick="saveVideo()">▶ Añadir a Videoteca</button>
+        <div id="admin-video-list" style="margin-top:1.5rem;"><span class="spinner"></span> Cargando...</div>
+      </div>
+
+      <div style="margin-bottom: 3rem;">
+        <h2 class="section-title">Aforismos</h2>
+        <div class="form-group"><label>Aforismo *</label><textarea id="quote-text" rows="3"></textarea></div>
+        <div class="form-group"><label>Autor *</label><input type="text" id="quote-author" /></div>
+        <div class="form-group">
+          <label>Retrato (Opcional)</label>
+          <input type="file" id="quote-image-file" accept="image/*" style="background:var(--bg-input); padding:0.5rem; color:var(--text); border:1px solid var(--border);" />
+        </div>
+        <button class="btn btn-primary" id="save-quote-btn" onclick="saveQuote()">✦ Publicar aforismo</button>
+        <div id="admin-quote-list" style="margin-top:1.5rem;"><span class="spinner"></span> Cargando...</div>
+      </div>
+
+      <div>
+        <h2 class="section-title">Biblioteca (PDF)</h2>
+        <div class="form-group"><label>Título</label><input type="text" id="pdf-title" /></div>
+        <div class="form-group"><label>Descripción</label><input type="text" id="pdf-desc" /></div>
+        <div class="form-group">
+          <label>Archivo PDF *</label>
+          <input type="file" id="pdf-file-input" accept=".pdf" style="background:var(--bg-input); padding:0.5rem; color:var(--text); border:1px solid var(--border);" />
+        </div>
+        <button class="btn btn-primary" id="upload-pdf-btn" onclick="uploadPdf()">↑ Subir texto</button>
+        <div id="admin-pdf-list" style="margin-top:1.5rem;"><span class="spinner"></span> Cargando...</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+    const ADMIN_PASSWORD = 'sofia2024'; 
+
+    function checkAdminPwd() {
+      if (document.getElementById('admin-pwd-input').value === ADMIN_PASSWORD) {
+        document.getElementById('admin-pwd-gate').classList.add('hidden');
+        document.getElementById('admin-panel').classList.remove('hidden');
+        loadAdminPosts(); loadAdminNews(); loadAdminQuotes(); loadAdminPdfs(); loadAdminVideos();
+      } else { showToast('Contraseña incorrecta', 'error'); }
+    }
+
+    /* ─── POSTS ─── */
+    let editingPostId = null;
+
+    async function loadAdminPosts() {
+      const el = document.getElementById('admin-post-list');
+      try {
+        const r = await fetch('/api/posts');
+        const data = await r.json();
+        const posts = data.posts || [];
+        el.innerHTML = posts.length ? posts.map(p => `
+          <div class="admin-list-item">
+            <span class="admin-list-title">${esc(p.title)}</span>
+            <button class="action-btn" onclick="editPost('${p.id}')">✎</button>
+            <button class="action-btn danger" onclick="deleteAdminPost('${p.id}')">✕</button>
+          </div>`).join('') : 'No hay entradas.';
+      } catch { el.textContent = 'Error al cargar.'; }
+    }
+
+    async function editPost(id) {
+      try {
+        const r = await fetch(`/api/posts/${id}`);
+        const data = await r.json();
+        const p = data.post;
+        document.getElementById('post-title').value = p.title;
+        document.getElementById('post-body').value = p.body;
+        document.getElementById('post-tags').value = (p.tags || []).join(', ');
+        editingPostId = id;
+        document.getElementById('post-edit-notice').classList.remove('hidden');
+        document.getElementById('save-post-btn').textContent = '✦ Guardar cambios';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch { showToast('Error al cargar entrada', 'error'); }
+    }
+
+    function cancelEditPost() {
+      editingPostId = null;
+      document.getElementById('post-title').value = '';
+      document.getElementById('post-body').value = '';
+      document.getElementById('post-tags').value = '';
+      document.getElementById('post-edit-notice').classList.add('hidden');
+      document.getElementById('save-post-btn').textContent = '✦ Publicar entrada';
+    }
+
+    async function savePost() {
+      const title = document.getElementById('post-title').value.trim();
+      const body = document.getElementById('post-body').value.trim();
+      const tags = document.getElementById('post-tags').value.split(',').map(t => t.trim()).filter(Boolean);
+      if (!title || !body) return showToast('Faltan datos', 'error');
+
+      const btn = document.getElementById('save-post-btn');
+      btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Guardando…';
+
+      try {
+        const url = editingPostId ? `/api/posts/${editingPostId}` : '/api/posts';
+        const method = editingPostId ? 'PUT' : 'POST';
+        const r = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title, body, tags }) });
+        if (r.ok) {
+          showToast(editingPostId ? 'Entrada actualizada' : 'Publicado');
+          cancelEditPost();
+          loadAdminPosts();
+        } else { showToast('Error', 'error'); }
+      } catch { showToast('Error de conexión', 'error'); }
+      finally { btn.disabled = false; btn.textContent = editingPostId ? '✦ Guardar cambios' : '✦ Publicar entrada'; }
+    }
+
+    async function deleteAdminPost(id) {
+      if (!confirm('¿Eliminar esta entrada?')) return;
+      try { await fetch(`/api/posts/${id}`, { method: 'DELETE' }); loadAdminPosts(); }
+      catch { showToast('Error al eliminar', 'error'); }
+    }
+
+    /* ─── NEWS ─── */
+    async function loadAdminNews() {
+      const el = document.getElementById('admin-news-list');
+      try {
+        const r = await fetch('/api/news');
+        const data = await r.json();
+        const news = data.news || [];
+        el.innerHTML = news.length ? news.map(n => `
+          <div class="admin-list-item">
+            <span class="admin-list-title">${esc(n.title)}</span>
+            <button class="action-btn danger" onclick="deleteNews('${n.id}')">✕</button>
+          </div>`).join('') : 'No hay noticias.';
+      } catch { el.textContent = 'Error al cargar.'; }
+    }
+
+    async function saveNews() {
+      const title = document.getElementById('news-title').value.trim();
+      const summary = document.getElementById('news-summary').value.trim();
+      const url = document.getElementById('news-url').value.trim();
+      if (!title || !summary) return showToast('Título y resumen obligatorios', 'error');
+
+      try {
+        const r = await fetch('/api/news', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, summary, url })
+        });
+        if (r.ok) {
+          showToast('✓ Noticia publicada');
+          document.getElementById('news-title').value = '';
+          document.getElementById('news-summary').value = '';
+          document.getElementById('news-url').value = '';
+          loadAdminNews();
+        } else { showToast('Error al guardar', 'error'); }
+      } catch { showToast('Error de conexión', 'error'); }
+    }
+
+    async function deleteNews(id) {
+      if (!confirm('¿Eliminar esta noticia?')) return;
+      try { await fetch(`/api/news/${id}`, { method: 'DELETE' }); loadAdminNews(); }
+      catch { showToast('Error al eliminar', 'error'); }
+    }
+
+    /* ─── VIDEOS ─── */
+    function extractYouTubeID(url) {
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+      const match = url.match(regExp);
+      return (match && match[2].length === 11) ? match[2] : null;
+    }
+
+    async function saveVideo() {
+      const title = document.getElementById('video-title').value.trim();
+      const desc = document.getElementById('video-desc').value.trim();
+      const rawLink = document.getElementById('video-link').value.trim();
+      if (!title || !rawLink) return showToast('Título y enlace obligatorios', 'error');
+
+      const ytID = extractYouTubeID(rawLink);
+      if (!ytID) return showToast('Enlace de YouTube no válido', 'error');
+
+      const btn = document.getElementById('save-video-btn');
+      btn.innerHTML = '<span class="spinner"></span> Guardando…'; btn.disabled = true;
+
+      try {
+        const r = await fetch('/api/videos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, description: desc, youtube_id: ytID })
+        });
+        if (r.ok) {
+          showToast('✓ Video añadido');
+          document.getElementById('video-title').value = '';
+          document.getElementById('video-desc').value = '';
+          document.getElementById('video-link').value = '';
+          loadAdminVideos();
+        } else { showToast('Error al guardar', 'error'); }
+      } catch { showToast('Error de conexión', 'error'); }
+      finally { btn.innerHTML = '▶ Añadir a Videoteca'; btn.disabled = false; }
+    }
+
+    async function loadAdminVideos() {
+      const el = document.getElementById('admin-video-list');
+      try {
+        const r = await fetch('/api/videos');
+        const data = await r.json();
+        const videos = data.videos || [];
+        el.innerHTML = videos.length ? videos.map(v => `
+          <div class="admin-list-item">
+            <span class="admin-list-title">▶ ${esc(v.title)}</span>
+            <button class="action-btn danger" onclick="deleteVideo('${v.id}')">✕</button>
+          </div>`).join('') : 'No hay videos.';
+      } catch { el.textContent = 'Error al cargar.'; }
+    }
+
+    async function deleteVideo(id) {
+      if (!confirm('¿Quitar video de la videoteca?')) return;
+      try { await fetch(`/api/videos/${id}`, { method: 'DELETE' }); loadAdminVideos(); }
+      catch { showToast('Error al eliminar', 'error'); }
+    }
+
+    /* ─── QUOTES ─── */
+    async function loadAdminQuotes() {
+      const el = document.getElementById('admin-quote-list');
+      try {
+        const r = await fetch('/api/quotes');
+        const data = await r.json();
+        const quotes = data.quotes || [];
+        el.innerHTML = quotes.length ? quotes.map(q => `
+          <div class="admin-list-item">
+            <span class="admin-list-title">"${esc(q.text).substring(0, 40)}…"</span>
+            <button class="action-btn danger" onclick="deleteQuote('${q.id}')">✕</button>
+          </div>`).join('') : 'No hay aforismos.';
+      } catch { el.textContent = 'Error al cargar.'; }
+    }
+
+    async function saveQuote() {
+      const text = document.getElementById('quote-text').value.trim();
+      const author = document.getElementById('quote-author').value.trim();
+      const imageFile = document.getElementById('quote-image-file').files[0];
+      if (!text || !author) return showToast('Faltan datos', 'error');
+
+      const btn = document.getElementById('save-quote-btn');
+      btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Guardando…';
+
+      const fd = new FormData();
+      fd.append('text', text); fd.append('author', author);
+      if (imageFile) fd.append('image', imageFile);
+
+      try {
+        const r = await fetch('/api/quotes', { method: 'POST', body: fd });
+        if (r.ok) {
+          showToast('Publicado');
+          document.getElementById('quote-text').value = '';
+          document.getElementById('quote-author').value = '';
+          document.getElementById('quote-image-file').value = '';
+          loadAdminQuotes();
+        } else { showToast('Error', 'error'); }
+      } catch { showToast('Error', 'error'); }
+      finally { btn.disabled = false; btn.innerHTML = '✦ Publicar aforismo'; }
+    }
+
+    async function deleteQuote(id) {
+      if (!confirm('¿Eliminar aforismo?')) return;
+      try { await fetch(`/api/quotes/${id}`, { method: 'DELETE' }); loadAdminQuotes(); }
+      catch { showToast('Error al eliminar', 'error'); }
+    }
+
+    /* ─── PDFs ─── */
+    async function loadAdminPdfs() {
+      const el = document.getElementById('admin-pdf-list');
+      try {
+        const r = await fetch('/api/pdfs');
+        const data = await r.json();
+        const pdfs = data.pdfs || [];
+        el.innerHTML = pdfs.length ? pdfs.map(p => `
+          <div class="admin-list-item">
+            <span class="admin-list-title">${esc(p.title)}</span>
+            <button class="action-btn danger" onclick="deletePdf('${p.id}')">✕</button>
+          </div>`).join('') : 'No hay textos.';
+      } catch { el.textContent = 'Error al cargar.'; }
+    }
+
+    async function uploadPdf() {
+      const title = document.getElementById('pdf-title').value.trim();
+      const desc = document.getElementById('pdf-desc').value.trim();
+      const file = document.getElementById('pdf-file-input').files[0];
+      if (!title || !file) return showToast('Faltan datos', 'error');
+
+      const btn = document.getElementById('upload-pdf-btn');
+      btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Subiendo…';
+
+      const fd = new FormData();
+      fd.append('title', title); fd.append('description', desc); fd.append('file', file);
+
+      try {
+        const r = await fetch('/api/pdfs', { method: 'POST', body: fd });
+        if (r.ok) {
+          showToast('Subido');
+          document.getElementById('pdf-title').value = '';
+          document.getElementById('pdf-desc').value = '';
+          document.getElementById('pdf-file-input').value = '';
+          loadAdminPdfs();
+        } else { showToast('Error', 'error'); }
+      } catch { showToast('Error', 'error'); }
+      finally { btn.disabled = false; btn.innerHTML = '↑ Subir texto'; }
+    }
+
+    async function deletePdf(id) {
+      if (!confirm('¿Eliminar PDF?')) return;
+      try { await fetch(`/api/pdfs/${id}`, { method: 'DELETE' }); loadAdminPdfs(); }
+      catch { showToast('Error al eliminar', 'error'); }
+    }
+
+    /* ─── UTILS ─── */
+    let toastTimer;
+    function showToast(m, t = '') {
+      const el = document.getElementById('toast');
+      el.textContent = m; el.className = 'show' + (t ? ' ' + t : '');
+      clearTimeout(toastTimer); toastTimer = setTimeout(() => el.className = '', 3000);
+    }
+    function esc(s = '') { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  </script>
+</body>
+</html>
