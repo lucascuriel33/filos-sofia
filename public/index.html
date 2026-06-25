@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>φίλος σοφία</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+ <header>
+    <div class="header-inner">
+      <a href="index.html" class="logo">
+        <span class="logo-greek">φίλος σοφία</span>
+        <span class="logo-sub">amigo de la sabiduría</span>
+      </a>
+      <nav>
+        <a href="index.html" class="active">Inicio</a>
+        <a href="biblioteca.html">Biblioteca</a>
+        <a href="agora.html">Ágora</a>
+        <a href="aforismos.html">Aforismos</a>
+        <a href="videoteca.html">Videoteca</a>
+        <button class="btn-secondary theme-btn" onclick="toggleTheme()" title="Cambiar tema" id="theme-icon">☽</button>
+        <a href="admin.html" class="btn admin-btn">⊕ Admin</a>
+      </nav>
+    </div>
+    <div class="greek-border"></div>
+  </header>
+
+  <section class="hero" id="inicio">
+    <div class="hero-ornament">❧ ✦ ❧</div>
+    <h1 class="hero-title">φίλος <span>σοφία</span></h1>
+    <p class="hero-tagline">Un espacio para el pensamiento, la contemplación y el amor al saber</p>
+    <div class="hero-divider">✦</div>
+  </section>
+
+  <div class="main-wrap">
+
+    <div id="sec-inicio">
+      <div class="layout">
+        <main>
+          <p class="section-title">Últimas Entradas</p>
+          <div class="posts" id="posts-container">
+            <div class="loading-row"><span class="spinner"></span> Cargando entradas…</div>
+          </div>
+        </main>
+
+        <aside class="sidebar">
+        
+        <div class="widget">
+          <p class="section-title">Sobre este espacio</p>
+          <p class="widget-text">Un rincón digital dedicado a la reflexión, la duda metódica y la búsqueda de la sabiduría en lo cotidiano. Lee, cuestiona y participa.</p>
+        </div>
+
+        <div class="widget">
+          <p class="section-title">Noticias</p>
+          <div id="news-feed">
+            <p class="widget-text" style="font-size: 0.85rem; font-style: italic; color: var(--text-3);">Cargando…</p>
+          </div>
+        </div>
+
+        <div class="widget">
+          <p class="section-title">Biblioteca</p>
+          <p class="widget-text" style="margin-bottom: 1.2rem;">Accede a nuestra colección curada de textos, ensayos y documentos en formato PDF para la contemplación profunda.</p>
+          <a href="biblioteca.html" class="btn btn-secondary btn-full">Entrar a la Biblioteca →</a>
+        </div>
+
+      </aside>
+      </div>
+    </div>
+
+  </div><!-- /.main-wrap -->
+
+  <footer>
+    <div class="greek-border mb-1-5"></div>
+    <span class="f-logo">φίλος σοφία</span>
+    <p>Amor a la sabiduría · Desplegado en Cloudflare Pages</p>
+  </footer>
+
+  <div class="modal-overlay" id="post-overlay" onclick="closePost(event)">
+    <div class="modal modal-post" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <span class="modal-title" id="post-modal-title"></span>
+        <button class="close-btn" onclick="closePost()">×</button>
+      </div>
+      <div id="post-modal-meta" class="post-modal-meta"></div>
+      <div id="post-modal-body" class="post-modal-body"></div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script>
+  /* ─── THEME ───────────────────────────────────────── */
+  let currentTheme = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', currentTheme);
+  updateThemeIcon();
+
+  function toggleTheme() {
+    currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    localStorage.setItem('theme', currentTheme);
+    updateThemeIcon();
+  }
+  function updateThemeIcon() {
+    document.getElementById('theme-icon').textContent = currentTheme === 'dark' ? '☀' : '☽';
+  }
+
+  /* ─── NAVIGATION ──────────────────────────────────── */
+  // Navigation is handled via direct page links (biblioteca.html, agora.html, etc.)
+
+  loadPosts();
+  loadNewsFeed();
+
+  /* ─── NEWS FEED ─────────────────────────────────────── */
+  async function loadNewsFeed() {
+    const el = document.getElementById('news-feed');
+    try {
+      const r = await fetch('/api/news');
+      const data = await r.json();
+      const news = data.news || [];
+      if (!news.length) {
+        el.innerHTML = '<p class="widget-text" style="font-size:0.85rem; font-style:italic; color:var(--text-3);">Sin noticias por el momento.</p>';
+        return;
+      }
+      el.innerHTML = news.slice(0, 5).map(n => `
+        <div class="news-item">
+          <div class="news-date">${formatDate(n.created_at)}</div>
+          <div class="news-title">${esc(n.title)}</div>
+          <div class="news-summary">${esc(n.summary)}</div>
+          ${n.url ? `<a href="${esc(n.url)}" target="_blank" rel="noopener" class="news-link">Leer más →</a>` : ''}
+        </div>`).join('');
+    } catch { el.innerHTML = '<p class="widget-text" style="color:var(--text-3);">Error al cargar noticias.</p>'; }
+  }
+
+  /* ─── POSTS ────────────────────────────────────────── */
+  async function loadPosts() {
+    const el = document.getElementById('posts-container');
+    el.innerHTML = '<div class="loading-row"><span class="spinner"></span> Cargando entradas…</div>';
+    try {
+      const r = await fetch('/api/posts');
+      const data = await r.json();
+      renderPosts(el, data.posts || []);
+    } catch { el.innerHTML = '<p style="color:var(--text-3);padding:1rem">Error al cargar entradas.</p>'; }
+  }
+
+  function renderPosts(el, posts) {
+    if (!posts.length) {
+      el.innerHTML = '<p style="color:var(--text-3);font-style:italic;padding:1rem 0">Aún no hay entradas. El administrador puede publicar la primera desde el panel.</p>';
+      return;
+    }
+    el.innerHTML = posts.map(p => `
+      <article class="post-card" onclick="openPost('${p.id}')">
+        <div class="post-meta">
+          ${(p.tags||[]).map(t => `<span class="post-tag">${esc(t)}</span>`).join('')}
+          ${formatDate(p.created_at)}
+        </div>
+        <h2 class="post-title">${esc(p.title)}</h2>
+        <p class="post-excerpt">${esc((p.excerpt||'').slice(0,240))}${p.excerpt && p.excerpt.length >= 240 ? '…' : ''}</p>
+        <div class="post-footer"><button class="read-more">Leer más →</button></div>
+      </article>`).join('');
+  }
+
+  async function openPost(id) {
+    document.getElementById('post-modal-title').textContent = '…';
+    document.getElementById('post-modal-meta').innerHTML = '';
+    document.getElementById('post-modal-body').textContent = '';
+    document.getElementById('post-overlay').classList.add('open');
+    try {
+      const r = await fetch(`/api/posts/${id}`);
+      const data = await r.json();
+      const p = data.post;
+      document.getElementById('post-modal-title').textContent = p.title;
+      document.getElementById('post-modal-meta').innerHTML = (p.tags||[]).map(t => `<span class="post-tag">${esc(t)}</span>`).join('') + `<span style="margin-left:0.3rem">${formatDate(p.created_at)}</span>`;
+      document.getElementById('post-modal-body').innerHTML = esc(p.body).replace(/\n/g, '<br>');
+    } catch { document.getElementById('post-modal-body').textContent = 'Error al cargar la entrada.'; }
+  }
+  function closePost(e) {
+    if (!e || e.target === document.getElementById('post-overlay')) document.getElementById('post-overlay').classList.remove('open');
+  }
+
+  /* ─── TOAST ────────────────────────────────────────── */
+  let toastTimer;
+  function showToast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.className = 'show' + (type ? ' '+type : '');
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => t.className = '', 3200);
+  }
+
+  /* ─── HELPERS ──────────────────────────────────────── */
+  function esc(s = '') { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function formatDate(iso) {
+    if (!iso) return '';
+    try { return new Date(iso).toLocaleDateString('es-ES', { year:'numeric', month:'long', day:'numeric' }); } catch { return iso; }
+  }
+  </script>
+</body>
+</html>

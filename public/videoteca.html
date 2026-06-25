@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Videoteca · φίλος σοφία</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+ <header>
+    <div class="header-inner">
+      <a href="index.html" class="logo">
+        <span class="logo-greek">φίλος σοφία</span>
+        <span class="logo-sub">amigo de la sabiduría</span>
+      </a>
+      <nav>
+        <a href="index.html">Inicio</a>
+        <a href="biblioteca.html">Biblioteca</a>
+        <a href="agora.html">Ágora</a>
+        <a href="aforismos.html">Aforismos</a>
+        <a href="videoteca.html" class="active">Videoteca</a>
+        <button class="btn-secondary theme-btn" onclick="toggleTheme()" title="Cambiar tema" id="theme-icon">☽</button>
+        <a href="admin.html" class="btn admin-btn">⊕ Admin</a>
+      </nav>
+    </div>
+    <div class="greek-border"></div>
+  </header>
+
+  <section class="hero">
+    <h1 class="hero-title">Videoteca</h1>
+    <p class="hero-tagline">Reflexiones y diálogos en formato audiovisual</p>
+  </section>
+
+  <div class="main-wrap">
+    <div class="videos-grid" id="videos-container">
+      <div class="loading-row"><span class="spinner"></span> Cargando videos…</div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="greek-border" style="margin-bottom:1.5rem"></div>
+    <span class="f-logo">φίλος σοφία</span>
+    <p>Amor a la sabiduría · Desplegado en Cloudflare Pages</p>
+  </footer>
+
+  <script>
+    /* ─── THEME ───────────────────────────────────────── */
+    let currentTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    updateThemeIcon();
+
+    function toggleTheme() {
+      currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', currentTheme);
+      localStorage.setItem('theme', currentTheme);
+      updateThemeIcon();
+    }
+    
+    function updateThemeIcon() {
+      document.getElementById('theme-icon').textContent = currentTheme === 'dark' ? '☀' : '☽';
+    }
+
+    /* ─── LOAD VIDEOS ─────────────────────────────────── */
+    async function loadVideos() {
+      const el = document.getElementById('videos-container');
+      try {
+        const r = await fetch('/api/videos'); 
+        
+        if (!r.ok) throw new Error('Network response was not ok');
+        
+        const data = await r.json();
+        const videos = data.videos || [];
+
+        if (!videos.length) {
+          el.innerHTML = '<div class="empty-state">No hay videos en la videoteca aún.<br><small style="font-size:0.85rem; margin-top:0.5rem; display:block;">El administrador puede añadirlos desde el panel.</small></div>';
+          return;
+        }
+
+        el.innerHTML = videos.map(v => `
+          <div class="video-card">
+            <div class="video-wrapper">
+              <iframe 
+                src="https://www.youtube.com/embed/${esc(v.youtube_id)}" 
+                title="${esc(v.title)}" 
+                frameborder="0" 
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                allowfullscreen>
+              </iframe>
+            </div>
+            <div class="video-info">
+              <h3 class="video-title">${esc(v.title)}</h3>
+              ${v.description ? `<p class="video-desc">${esc(v.description)}</p>` : ''}
+              <div class="video-date">${formatDate(v.created_at)}</div>
+            </div>
+          </div>
+        `).join('');
+
+      } catch (error) {
+        el.innerHTML = '<div class="empty-state">Error al cargar la videoteca. Asegúrate de que la API esté conectada.</div>';
+      }
+    }
+
+    /* ─── HELPERS ──────────────────────────────────────── */
+    function esc(s = '') {
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '';
+      try { return new Date(iso).toLocaleDateString('es-ES', { year:'numeric', month:'long', day:'numeric' }); } catch { return iso; }
+    }
+
+    // Cargar al iniciar
+    document.addEventListener('DOMContentLoaded', loadVideos);
+  </script>
+</body>
+</html>

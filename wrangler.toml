@@ -1,0 +1,23 @@
+name = "filos-sofia"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = "public"
+
+# Conexión a tu base de datos D1
+[[d1_databases]]
+binding = "DB" 
+database_name = "quotes"
+database_id = "e4714006-8ab4-4582-ac6e-05ddb4e46eee"
+
+# ── KV Namespace (comments & pdf index) ─────────────────────
+[[kv_namespaces]]
+binding = "FILOS_KV"
+id = "2dbc9649999c48cb8d349ea2c46b2da2"
+
+# ── R2 Bucket (PDF files & avatars) ─────────────────────────
+[[r2_buckets]]
+binding = "FILOS_BUCKET"
+bucket_name = "filos-sofia-bucket"
+
+# ── (Optional) Environment Variables ────────────────────────
+[vars]
+SITE_NAME = "φίλος σοφία"

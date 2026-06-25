@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Biblioteca · φίλος σοφία</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <a href="index.html" class="logo">
+        <span class="logo-greek">φίλος σοφία</span>
+        <span class="logo-sub">amigo de la sabiduría</span>
+      </a>
+      <nav>
+        <a href="index.html">Inicio</a>
+        <a href="biblioteca.html" class="active">Biblioteca</a>
+        <a href="agora.html">Ágora</a>
+        <a href="aforismos.html">Aforismos</a>
+        <a href="videoteca.html">Videoteca</a>
+        <button class="btn-secondary theme-btn" onclick="toggleTheme()" title="Cambiar tema" id="theme-icon">☽</button>
+        <a href="admin.html" class="btn admin-btn">⊕ Admin</a>
+      </nav>
+    </div>
+    <div class="greek-border"></div>
+  </header>
+
+  <section class="hero">
+    <h1 class="hero-title">Biblioteca</h1>
+    <p class="hero-tagline">Textos, ensayos y documentos para la contemplación</p>
+  </section>
+
+  <div class="main-wrap">
+    <div class="section-container" style="padding-top: 0;">
+      <p class="section-title">Archivos Disponibles</p>
+      
+      <div id="pdf-list">
+        <div class="loading-row"><span class="spinner"></span> Buscando textos…</div>
+      </div>
+      
+    </div>
+  </div>
+
+  <footer>
+    <div class="greek-border" style="margin-bottom:1.5rem"></div>
+    <span class="f-logo">φίλος σοφία</span>
+    <p>Amor a la sabiduría · Desplegado en Cloudflare Pages</p>
+  </footer>
+
+  <div id="toast"></div>
+
+  <script>
+    /* ─── THEME ─── */
+    let currentTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    updateThemeIcon();
+    function toggleTheme() {
+      currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', currentTheme);
+      localStorage.setItem('theme', currentTheme);
+      updateThemeIcon();
+    }
+    function updateThemeIcon() { document.getElementById('theme-icon').textContent = currentTheme === 'dark' ? '☀' : '☽'; }
+
+    /* ─── UTILS ─── */
+    let toastTimer;
+    function showToast(msg, type = '') {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.className = 'show' + (type ? ' '+type : '');
+      clearTimeout(toastTimer); toastTimer = setTimeout(() => t.className = '', 3200);
+    }
+    function esc(s = '') { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function formatDate(iso) {
+      if (!iso) return '';
+      try { return new Date(iso).toLocaleDateString('es-ES', { year:'numeric', month:'long', day:'numeric' }); } catch { return iso; }
+    }
+
+    /* ─── LOAD PDFs (EXCLUSIVO PARA BIBLIOTECA) ─── */
+    async function loadPdfs() {
+      const el = document.getElementById('pdf-list');
+      try {
+        const r = await fetch('/api/pdfs');
+        if (!r.ok) throw new Error('Error en la red');
+        
+        const data = await r.json();
+        const pdfs = data.pdfs || [];
+
+        if (!pdfs.length) {
+          el.innerHTML = '<div class="empty-state">Aún no hay textos en la biblioteca.<br><small style="font-size:0.85rem">El administrador puede subir PDFs desde el panel.</small></div>';
+          return;
+        }
+
+        el.innerHTML = `<div style="display:flex;flex-direction:column;gap:1rem;">${pdfs.map(p => `
+          <div class="pdf-item" onclick="downloadPdf('${p.id}','${esc(p.title)}')">
+            <div class="pdf-icon">
+              <div class="pdf-icon-inner">
+                <span class="pdf-ext">PDF</span>
+                <div class="pdf-lines"><span></span><span></span><span></span></div>
+              </div>
+            </div>
+            <div class="pdf-info">
+              <div class="pdf-name">${esc(p.title)}</div>
+              <div class="pdf-meta">${esc(p.description || '')} · ${formatDate(p.created_at)}</div>
+            </div>
+            <span class="pdf-arrow">↓ Descargar</span>
+          </div>`).join('')}</div>`;
+      } catch (error) { 
+        el.innerHTML = '<div class="empty-state">Error al cargar la biblioteca. Asegúrate de que la API de PDFs esté conectada.</div>'; 
+      }
+    }
+
+    async function downloadPdf(id, title) {
+      showToast('Iniciando descarga...');
+      try {
+        const r = await fetch(`/api/pdfs/${id}`);
+        if (!r.ok) throw new Error('Error al obtener el archivo');
+        
+        const blob = await r.blob();
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        // Limpiamos el nombre para que el archivo descargado no tenga caracteres raros
+        a.download = title.replace(/[^a-z0-9áéíóúüñ ]/gi,'_') + '.pdf';
+        a.click(); 
+        URL.revokeObjectURL(a.href);
+      } catch { 
+        showToast('Error de descarga', 'error'); 
+      }
+    }
+
+    // Asegurarnos de que SOLO se ejecute loadPdfs al cargar esta página
+    document.addEventListener('DOMContentLoaded', loadPdfs);
+  </script>
+</body>
+</html>
