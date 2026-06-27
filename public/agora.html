@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 </head>
 <body>
 
@@ -71,6 +72,9 @@
           <textarea id="c-text" rows="4" placeholder="Comparte tu reflexión o pregunta…"></textarea>
         </div>
         
+        <!-- Turnstile CAPTCHA: replace data-sitekey with your real site key from the Cloudflare dashboard -->
+        <div class="cf-turnstile" data-sitekey="YOUR_TURNSTILE_SITE_KEY" data-theme="light" style="margin-bottom:1rem;"></div>
+
         <button class="btn btn-primary" id="submit-comment-btn" onclick="submitComment()">✦ Publicar en el Ágora</button>
       </div>
 
@@ -189,17 +193,24 @@
       fd.append('website', document.getElementById('c-website').value); // honeypot
       if (email) fd.append('email', email);
       if (avatarFile) fd.append('avatar', avatarFile);
+      // Turnstile injects a hidden input named cf-turnstile-response inside the widget.
+      const tsField = document.querySelector('[name="cf-turnstile-response"]');
+      if (tsField) fd.append('cf-turnstile-response', tsField.value);
 
       try {
         const r = await fetch('/api/comments', { method: 'POST', body: fd });
         if (r.ok) {
-          showToast('✓ Tu voz ha sido añadida');
+          showToast('✓ Tu pensamiento fue enviado y aparecerá tras ser aprobado.');
           document.getElementById('c-name').value = ''; document.getElementById('c-text').value = '';
           document.getElementById('c-email').value = ''; document.getElementById('avatar-file').value = '';
           document.getElementById('avatar-preview-img').style.display = 'none';
           document.getElementById('avatar-preview-icon').style.display = 'inline';
-          loadComments();
-        } else { showToast('Error al publicar', 'error'); }
+          if (window.turnstile) turnstile.reset();
+        } else {
+          const msg = r.status === 403 ? 'Verificación de seguridad fallida. Recarga la página.' : 'Error al publicar';
+          showToast(msg, 'error');
+          if (window.turnstile) turnstile.reset();
+        }
       } catch { showToast('Error de conexión', 'error'); }
       finally { btn.innerHTML = '✦ Publicar en el Ágora'; btn.disabled = false; }
     }

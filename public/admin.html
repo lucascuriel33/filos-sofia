@@ -34,6 +34,12 @@
       <div style="text-align:right; margin-bottom:1.5rem;">
         <button class="btn-secondary" onclick="logoutAdmin()" style="font-family:'Cormorant Garamond',serif;">Cerrar sesión</button>
       </div>
+
+      <div style="margin-bottom: 3rem;">
+        <h2 class="section-title">Comentarios pendientes</h2>
+        <p style="color:var(--text-3); font-size:0.85rem; margin-bottom:1rem;">Los comentarios del Ágora no se publican hasta que los apruebes aquí.</p>
+        <div id="admin-pending-list" style="margin-top:1rem;"><span class="spinner"></span> Cargando...</div>
+      </div>
       
       <div style="margin-bottom: 3rem;">
         <h2 class="section-title">Entradas del Blog</h2>
@@ -110,7 +116,7 @@
     function revealPanel() {
       document.getElementById('admin-pwd-gate').classList.add('hidden');
       document.getElementById('admin-panel').classList.remove('hidden');
-      loadAdminPosts(); loadAdminNews(); loadAdminQuotes(); loadAdminPdfs(); loadAdminVideos();
+      loadAdminPosts(); loadAdminNews(); loadAdminQuotes(); loadAdminPdfs(); loadAdminVideos(); loadAdminPending();
     }
 
     async function checkAdminPwd() {
@@ -141,6 +147,48 @@
     }
 
     window.addEventListener('DOMContentLoaded', initAdmin);
+
+    /* ─── COMMENT MODERATION ─── */
+    async function loadAdminPending() {
+      const el = document.getElementById('admin-pending-list');
+      try {
+        const r = await fetch('/api/comments/pending', { credentials: 'same-origin' });
+        if (!r.ok) { el.textContent = 'Error al cargar.'; return; }
+        const data = await r.json();
+        const list = data.comments || [];
+        if (!list.length) {
+          el.innerHTML = '<p style="color:var(--text-3);font-style:italic;">No hay comentarios pendientes.</p>';
+          return;
+        }
+        el.innerHTML = list.map(c => `
+          <div class="admin-list-item" style="flex-direction:column;align-items:stretch;gap:0.6rem;padding:1rem;">
+            <div><strong>${esc(c.name)}</strong>${c.email ? ` <span style="color:var(--text-3);font-size:0.8rem;">(${esc(c.email)})</span>` : ''}</div>
+            <div style="color:var(--text-2);font-size:0.9rem;white-space:pre-wrap;line-height:1.5;">${esc(c.text)}</div>
+            ${c.avatar_url ? `<img src="${esc(c.avatar_url)}" alt="" style="width:40px;height:40px;border-radius:50%;object-fit:cover;" />` : ''}
+            <div style="display:flex;gap:0.6rem;margin-top:0.3rem;">
+              <button class="btn btn-primary" style="padding:0.35rem 0.9rem;font-size:0.85rem;" onclick="approveComment('${c.id}')">✓ Aprobar</button>
+              <button class="action-btn danger" onclick="rejectComment('${c.id}')">✕ Eliminar</button>
+            </div>
+          </div>`).join('');
+      } catch { el.textContent = 'Error al cargar.'; }
+    }
+
+    async function approveComment(id) {
+      try {
+        const r = await fetch(`/api/comments/${id}/approve`, { method: 'POST', credentials: 'same-origin' });
+        if (r.ok) { showToast('✓ Comentario aprobado'); loadAdminPending(); }
+        else showToast('Error al aprobar', 'error');
+      } catch { showToast('Error de conexión', 'error'); }
+    }
+
+    async function rejectComment(id) {
+      if (!confirm('¿Eliminar este comentario permanentemente?')) return;
+      try {
+        const r = await fetch(`/api/comments/${id}`, { method: 'DELETE', credentials: 'same-origin' });
+        if (r.ok) { showToast('Comentario eliminado'); loadAdminPending(); }
+        else showToast('Error al eliminar', 'error');
+      } catch { showToast('Error de conexión', 'error'); }
+    }
 
     /* ─── POSTS ─── */
     let editingPostId = null;

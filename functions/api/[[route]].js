@@ -121,6 +121,13 @@ export async function onRequest(context) {
   // ── Comments ──────────────────────────────────────────────
   if (route === 'comments' && method === 'GET')  return listComments(env);
   if (route === 'comments' && method === 'POST') return addComment(request, env);
+  if (route === 'comments/pending' && method === 'GET') return listPendingComments(request, env);
+
+  const cApprove = route.match(/^comments\/([a-z0-9_]+)\/approve$/i);
+  if (cApprove && method === 'POST') return approveComment(cApprove[1], env);
+
+  const cDelete = route.match(/^comments\/([a-z0-9_]+)$/i);
+  if (cDelete && method === 'DELETE') return deleteComment(cDelete[1], env);
 
   // ── Avatars ───────────────────────────────────────────────
   const avMatch = route.match(/^avatars\/(.+)$/);
@@ -287,7 +294,35 @@ async function deletePost(id, env) {
 async function listComments(env) {
   const raw      = await env.FILOS_KV.get('comments:list');
   const comments = raw ? JSON.parse(raw) : [];
-  return json({ comments: comments.map(({ email, ...c }) => c) });
+  return json({
+    comments: comments
+      // Show approved comments. Legacy comments (no status field, posted
+      // before moderation existed) are grandfathered in as visible.
+      .filter(c => c.status !== 'pending' && c.status !== 'rejected')
+      .map(({ email, ...c }) => c),
+  });
+}
+
+// Verify a Cloudflare Turnstile token. Fails OPEN if no secret is configured
+// yet (so the comment form keeps working until you finish Turnstile setup);
+// once TURNSTILE_SECRET_KEY is set, a missing/invalid token is rejected.
+async function verifyTurnstile(token, ip, env) {
+  if (!env.TURNSTILE_SECRET_KEY) return true; // not configured → skip
+  if (!token) return false;
+  try {
+    const body = new URLSearchParams();
+    body.append('secret', env.TURNSTILE_SECRET_KEY);
+    body.append('response', token);
+    if (ip && ip !== 'unknown') body.append('remoteip', ip);
+    const res  = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      body,
+    });
+    const data = await res.json();
+    return data.success === true;
+  } catch {
+    return false; // network/verify error (only reached when secret is set)
+  }
 }
 
 async function addComment(request, env) {
@@ -311,6 +346,12 @@ async function addComment(request, env) {
   // Honeypot: bots fill hidden fields; humans never see this one.
   if ((form.get('website') || '').trim() !== '') {
     return json({ ok: true }); // silently drop, pretend success
+  }
+
+  // CAPTCHA: verify the Turnstile token (no-op until the secret is configured).
+  const tsOk = await verifyTurnstile(form.get('cf-turnstile-response'), ip, env);
+  if (!tsOk) {
+    return err('Verificación de seguridad fallida. Recarga la página e inténtalo de nuevo.', 403);
   }
 
   const name   = (form.get('name')  || '').trim().slice(0, 80);
@@ -344,6 +385,7 @@ async function addComment(request, env) {
     id, name, text,
     email: email || null,
     avatar_url,
+    status: 'pending', // awaits admin approval before appearing publicly
     created_at: new Date().toISOString(),
   };
 
@@ -353,7 +395,44 @@ async function addComment(request, env) {
   if (comments.length > 500) comments.pop();
   await env.FILOS_KV.put('comments:list', JSON.stringify(comments));
 
-  return json({ ok: true, id });
+  return json({ ok: true, id, pending: true });
+}
+
+// Admin: list comments awaiting moderation (GET is not blanket-guarded, so check here).
+async function listPendingComments(request, env) {
+  const denied = await requireAuth(request, env, CORS_HEADERS);
+  if (denied) return denied;
+  const raw      = await env.FILOS_KV.get('comments:list');
+  const comments = raw ? JSON.parse(raw) : [];
+  return json({ comments: comments.filter(c => c.status === 'pending') });
+}
+
+// Admin: approve a pending comment (reached only via blanket-guarded POST).
+async function approveComment(id, env) {
+  const raw      = await env.FILOS_KV.get('comments:list');
+  const comments = raw ? JSON.parse(raw) : [];
+  const idx = comments.findIndex(c => c.id === id);
+  if (idx === -1) return err('Comentario no encontrado', 404);
+  comments[idx].status = 'approved';
+  await env.FILOS_KV.put('comments:list', JSON.stringify(comments));
+  return json({ ok: true });
+}
+
+// Admin: delete/reject a comment (reached only via blanket-guarded DELETE).
+async function deleteComment(id, env) {
+  const raw      = await env.FILOS_KV.get('comments:list');
+  const comments = raw ? JSON.parse(raw) : [];
+  const idx = comments.findIndex(c => c.id === id);
+  if (idx === -1) return err('Comentario no encontrado', 404);
+
+  // Clean up the avatar from R2 if one was uploaded.
+  const av = comments[idx].avatar_url;
+  if (av && av.startsWith('/api/avatars/')) {
+    try { await env.FILOS_BUCKET.delete('avatars/' + av.replace('/api/avatars/', '')); } catch {}
+  }
+  comments.splice(idx, 1);
+  await env.FILOS_KV.put('comments:list', JSON.stringify(comments));
+  return json({ ok: true });
 }
 
 // ─── NEWS HANDLERS ───────────────────────────────────────────
