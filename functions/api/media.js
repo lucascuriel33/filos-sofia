@@ -39,6 +39,7 @@ export async function onRequestGet({ request, env }) {
     return new Response(object.body, { headers });
     
   } catch (error) {
-    return new Response('Error interno: ' + error.message, { status: 500 });
+    console.error('media GET error:', error);
+    return new Response('Error interno del servidor', { status: 500 });
   }
 }

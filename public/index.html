@@ -131,7 +131,7 @@
           <div class="news-date">${formatDate(n.created_at)}</div>
           <div class="news-title">${esc(n.title)}</div>
           <div class="news-summary">${esc(n.summary)}</div>
-          ${n.url ? `<a href="${esc(n.url)}" target="_blank" rel="noopener" class="news-link">Leer más →</a>` : ''}
+          ${safeUrl(n.url) ? `<a href="${esc(safeUrl(n.url))}" target="_blank" rel="noopener" class="news-link">Leer más →</a>` : ''}
         </div>`).join('');
     } catch { el.innerHTML = '<p class="widget-text" style="color:var(--text-3);">Error al cargar noticias.</p>'; }
   }
@@ -191,7 +191,9 @@
   }
 
   /* ─── HELPERS ──────────────────────────────────────── */
-  function esc(s = '') { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function esc(s = '') { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+  // Only allow http(s) links — blocks javascript:/data: URI schemes in admin-supplied URLs.
+  function safeUrl(u = '') { return /^https?:\/\//i.test(String(u).trim()) ? String(u).trim() : null; }
   function formatDate(iso) {
     if (!iso) return '';
     try { return new Date(iso).toLocaleDateString('es-ES', { year:'numeric', month:'long', day:'numeric' }); } catch { return iso; }

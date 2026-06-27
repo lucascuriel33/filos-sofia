@@ -94,11 +94,8 @@ export async function onRequest(context) {
   if (route === 'pdfs' && method === 'GET')  return listPdfs(env);
   if (route === 'pdfs' && method === 'POST') return uploadPdf(request, env);
 
-  const pdfMatch = route.match(/^pdfs\/([a-z0-9_-]+)$/i);
-  if (pdfMatch) {
-    if (method === 'GET')    return downloadPdf(pdfMatch[1], env);
-    if (method === 'DELETE') return deletePdf(pdfMatch[1], env);
-  }
+  // Note: GET/DELETE /api/pdfs/:id are handled by the more-specific
+  // functions/api/pdfs/[id].js, which Pages routes before this catch-all.
 
   // ── Posts ─────────────────────────────────────────────────
   if (route === 'posts' && method === 'GET')  return listPosts(env);
@@ -199,38 +196,6 @@ async function uploadPdf(request, env) {
   await env.FILOS_KV.put('pdfs:index', JSON.stringify(pdfs));
 
   return json({ ok: true, id }, 201);
-}
-
-async function downloadPdf(id, env) {
-  const raw  = await env.FILOS_KV.get('pdfs:index');
-  const pdfs = raw ? JSON.parse(raw) : [];
-  const meta = pdfs.find(p => p.id === id);
-  if (!meta) return err('PDF no encontrado', 404);
-
-  const obj = await env.FILOS_BUCKET.get(meta.r2Key);
-  if (!obj)  return err('Archivo no encontrado en almacenamiento', 404);
-
-  const blob = await obj.arrayBuffer();
-  return new Response(blob, {
-    headers: {
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename="${encodeURIComponent(meta.title)}.pdf"`,
-      ...CORS_HEADERS,
-    },
-  });
-}
-
-async function deletePdf(id, env) {
-  const raw  = await env.FILOS_KV.get('pdfs:index');
-  const pdfs = raw ? JSON.parse(raw) : [];
-  const idx  = pdfs.findIndex(p => p.id === id);
-  if (idx === -1) return err('PDF no encontrado', 404);
-
-  await env.FILOS_BUCKET.delete(pdfs[idx].r2Key);
-  pdfs.splice(idx, 1);
-  await env.FILOS_KV.put('pdfs:index', JSON.stringify(pdfs));
-
-  return json({ ok: true });
 }
 
 // ─── POST HANDLERS ───────────────────────────────────────────

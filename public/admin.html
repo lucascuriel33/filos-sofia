@@ -135,7 +135,7 @@
     }
 
     async function logoutAdmin() {
-      try { await fetch('/api/auth/logout', { credentials: 'same-origin', method: 'POST', credentials: 'same-origin' }); }
+      try { await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' }); }
       catch {}
       location.reload();
     }
@@ -411,7 +411,7 @@
       el.textContent = m; el.className = 'show' + (t ? ' ' + t : '');
       clearTimeout(toastTimer); toastTimer = setTimeout(() => el.className = '', 3000);
     }
-    function esc(s = '') { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function esc(s = '') { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
   </script>
 </body>
 </html>

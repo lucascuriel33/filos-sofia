@@ -74,7 +74,7 @@
       t.textContent = msg; t.className = 'show' + (type ? ' '+type : '');
       clearTimeout(toastTimer); toastTimer = setTimeout(() => t.className = '', 3200);
     }
-    function esc(s = '') { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function esc(s = '') { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
     function formatDate(iso) {
       if (!iso) return '';
       try { return new Date(iso).toLocaleDateString('es-ES', { year:'numeric', month:'long', day:'numeric' }); } catch { return iso; }
@@ -96,7 +96,7 @@
         }
 
         el.innerHTML = `<div style="display:flex;flex-direction:column;gap:1rem;">${pdfs.map(p => `
-          <div class="pdf-item" onclick="downloadPdf('${p.id}','${esc(p.title)}')">
+          <div class="pdf-item" data-pdf-id="${esc(p.id)}" data-pdf-title="${esc(p.title)}">
             <div class="pdf-icon">
               <div class="pdf-icon-inner">
                 <span class="pdf-ext">PDF</span>
@@ -109,6 +109,11 @@
             </div>
             <span class="pdf-arrow">↓ Descargar</span>
           </div>`).join('')}</div>`;
+
+        // Attach handlers via dataset — title/id never enter an executable context.
+        el.querySelectorAll('.pdf-item').forEach(item => {
+          item.addEventListener('click', () => downloadPdf(item.dataset.pdfId, item.dataset.pdfTitle));
+        });
       } catch (error) { 
         el.innerHTML = '<div class="empty-state">Error al cargar la biblioteca. Asegúrate de que la API de PDFs esté conectada.</div>'; 
       }

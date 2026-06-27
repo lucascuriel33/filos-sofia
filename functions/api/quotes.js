@@ -64,6 +64,7 @@ export async function onRequestPost({ request, env }) {
     });
 
   } catch (error) {
-    return new Response(JSON.stringify({ error: "Error interno: " + error.message }), { status: 500 });
+    console.error('quotes POST error:', error);
+    return new Response(JSON.stringify({ error: "Error interno del servidor" }), { status: 500 });
   }
 }

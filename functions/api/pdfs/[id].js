@@ -43,7 +43,8 @@ export async function onRequestGet({ params, env }) {
       },
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: 'Error interno al descargar: ' + error.message }), {
+    console.error('pdf download error:', error);
+    return new Response(JSON.stringify({ error: 'Error interno al descargar' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
     });
@@ -74,7 +75,8 @@ export async function onRequestDelete({ request, params, env }) {
       headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: 'Error interno al borrar: ' + error.message }), {
+    console.error('pdf delete error:', error);
+    return new Response(JSON.stringify({ error: 'Error interno al borrar' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
     });
